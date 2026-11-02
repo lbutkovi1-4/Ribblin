@@ -71,6 +71,7 @@ public static class RibblinLevelBuilder
     {
         var t = new Theme { id = "L1" };
         var scene = Kit.NewScene(t);
+        Kit.SetDifficulty(2.2f, 7f, false);     // Level 1: spori, kratko te prate
         Kit.WaterPlane(-0.3f);
 
         // glavni otok
@@ -296,6 +297,7 @@ public static class RibblinLevelBuilder
         t.colors["TrunkDark"] = new Color(0.27f, 0.21f, 0.16f);
         t.colors["Rock"] = new Color(0.42f, 0.44f, 0.4f);
         var scene = Kit.NewScene(t);
+        Kit.SetDifficulty(2.9f, 9f, false);     // Level 2: brži, dalje vide
         Kit.WaterPlane(0f);
 
         // S0 – početni otok
@@ -367,6 +369,9 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(-8.5f, 8.5f, 107));
         Kit.Slime(new Vector3(-4, 1, 97), 3f, "SlimePurple");
         Kit.Fruit(new Vector3(0, 2, 96));
+        Kit.Slime(new Vector3(4, 1, 99), 3f, "SlimePurple");
+        Kit.Slime(new Vector3(-2, 1, 36), 3f, "SlimePurple");
+        Kit.Slime(new Vector3(0, 1, 2), 4f, "SlimePurple");
         Kit.MushroomDeco(new Vector3(6, 1, 96), 1.2f);
         Kit.MushroomDeco(new Vector3(-6, 1, 98), 0.9f);
 
@@ -478,6 +483,7 @@ public static class RibblinLevelBuilder
         t.colors["Rock"] = new Color(0.27f, 0.23f, 0.24f);
         t.colors["RockLight"] = new Color(0.38f, 0.33f, 0.33f);
         var scene = Kit.NewScene(t);
+        Kit.SetDifficulty(3.6f, 11f, true);     // Level 3: još brži i skaču na žabicu
         Kit.WaterPlane(0f, "LavaPlane");
 
         // S0 – start
@@ -502,6 +508,10 @@ public static class RibblinLevelBuilder
         Kit.Geyser(new Vector3(4, 6.5f, 38.5f), 2.6f);
         Kit.Slime(new Vector3(3, 6.5f, 43), 2.5f, "SlimeOrange");
         Kit.Fruit(new Vector3(-4.5f, 7.5f, 43.5f));
+        Kit.Slime(new Vector3(-3, 6.5f, 38), 2.5f, "SlimeOrange");
+        Kit.Slime(new Vector3(0, 6.5f, 77), 2f, "SlimeOrange");
+        Kit.Slime(new Vector3(-3, 15, 115), 2.5f, "SlimeOrange");
+        Kit.Slime(new Vector3(0, 15, 100), 1f, "SlimeOrange");
         Kit.Fruit(new Vector3(4.5f, 7.5f, 43.5f));
 
         // S3 – pokretne platforme iznad lave
@@ -655,6 +665,7 @@ public static class RibblinLevelBuilder
         t.colors["SideDark"] = new Color(0.45f, 0.36f, 0.3f);
         t.colors["Rock"] = new Color(0.75f, 0.72f, 0.8f);
         var scene = Kit.NewScene(t);
+        Kit.SetDifficulty(4.3f, 13f, true);     // Level 4: najbrži i najagresivniji
 
         // more oblaka ispod
         // oblaci samo sa strane (daleko od staze i arene), nikad ispod platformi
@@ -700,6 +711,8 @@ public static class RibblinLevelBuilder
         Kit.Slime(new Vector3(-2, 20, 96), 2.5f, "SlimeBlue");
         Kit.Slime(new Vector3(-10, 20, 96), 2.5f, "SlimeBlue");
         Kit.Fruit(new Vector3(-1, 21, 89));
+        Kit.Slime(new Vector3(-6, 20, 120), 3f, "SlimeBlue");
+        Kit.Slime(new Vector3(3, 10, 2), 3f, "SlimeBlue");
         Kit.Fruit(new Vector3(-11, 21, 90));
 
         // S5 – pokretni oblaci

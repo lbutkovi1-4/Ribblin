@@ -29,6 +29,18 @@ public static class Kit
     public static Transform Root;
     public static Theme T;
     public static int FruitCount;
+
+    // težina neprijatelja – postavlja se na početku svakog levela
+    public static float SlimeSpeed = 2.2f;
+    public static float SlimeChase = 7f;
+    public static bool SlimeLunge = false;
+
+    public static void SetDifficulty(float speed, float chase, bool lunge)
+    {
+        SlimeSpeed = speed;
+        SlimeChase = chase;
+        SlimeLunge = lunge;
+    }
     static int fruitIndex;
     static readonly Dictionary<string, Material> mats = new Dictionary<string, Material>();
 
@@ -423,6 +435,9 @@ public static class Kit
         s.radius = 0.7f * size;
         s.height = 1.0f * size;
         s.chase = chase;
+        s.speed = SlimeSpeed;
+        s.chaseRange = SlimeChase;
+        s.lunge = SlimeLunge;
     }
 
     public static void Spikes(Vector3 center, float length, bool alongX)
