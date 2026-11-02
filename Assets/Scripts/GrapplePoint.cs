@@ -61,7 +61,7 @@ public class GrapplePoint : MonoBehaviour
             if (frog && hintCooldown <= 0f && Vector3.Distance(frog.transform.position, transform.position) < 12f)
             {
                 int missing = requiredFruit - GameManager.Collected;
-                GameManager.ShowMessage($"Skupi još {missing} voća da se otključaju rotkvice do bossa!", 2.5f);
+                GameManager.ShowMessage($"Collect {missing} more fruit to unlock the path to the boss!", 2.5f);
                 hintCooldown = 3f;
             }
         }

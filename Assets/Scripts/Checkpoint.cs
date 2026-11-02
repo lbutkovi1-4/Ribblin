@@ -17,7 +17,7 @@ public class Checkpoint : MonoBehaviour
             reached = true;
             frog.SetCheckpoint(transform.position + Vector3.up * 0.5f);
             PlayerHealth.Instance?.Heal(3);
-            GameManager.ShowMessage("Checkpoint! Srca su napunjena.", 2f);
+            GameManager.ShowMessage("Checkpoint! Hearts restored.", 2f);
             Sfx.Play("checkpoint", 0.5f);
             if (flag)
             {

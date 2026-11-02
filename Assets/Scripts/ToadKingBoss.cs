@@ -1,22 +1,35 @@
 using UnityEngine;
 
-// BOSS 2 – Kralj Krastača.
-// Skače prema žabici i pri doskoku šalje udarne valove (preskoči ih). Nakon nekoliko skokova se umori – skoči mu na glavu.
+// BOSS 2 – King Croakus.
+// Skače prema žabici i pri doskoku šalje udarne valove (preskoči ih).
+// Nakon dva skoka se umori: tad mu skoči na glavu ILI jezikom uhvati njegovu krunu.
 public class ToadKingBoss : BossBase
 {
-    public float topHeight = 3.4f;
+    public float topHeight = 2.7f;
+    public GrapplePoint crownPoint;
     public Transform model;
     public GameObject tiredFx;
     public float jumpDuration = 1.1f;
     public float jumpHeight = 7f;
-    public int jumpsBeforeTired = 3;
-    public float waveSpeed = 8f;
+    public int jumpsBeforeTired = 2;
+    public float waveSpeed = 6.5f;
+    public float tiredTime = 6.5f;
 
     enum S { Idle, Jump, Land, Tired }
     S s = S.Idle;
     Vector3 jumpFrom, jumpTo;
     int jumpsDone;
     float hintCooldown;
+
+    protected override void Start()
+    {
+        base.Start();
+        if (crownPoint)
+        {
+            crownPoint.targetable = false;
+            crownPoint.Grappled += _ => { if (s == S.Tired) TiredHit(true); };
+        }
+    }
 
     protected override void OnActivate()
     {
@@ -35,7 +48,7 @@ public class ToadKingBoss : BossBase
         if (s != S.Tired && s != S.Jump && IsStomped(2.8f, top))
         {
             frog.Bounce(3.5f);
-            if (hintCooldown <= 0f) { GameManager.ShowMessage("Kralj je prejak dok skače! Pričekaj da se umori.", 3f); hintCooldown = 4f; }
+            if (hintCooldown <= 0f) { GameManager.ShowMessage("The King is too strong while jumping! Wait until he gets tired.", 3f); hintCooldown = 4f; }
             return;
         }
 
@@ -65,9 +78,10 @@ public class ToadKingBoss : BossBase
                     if (jumpsDone >= jumpsBeforeTired)
                     {
                         s = S.Tired;
-                        stateTimer = 4.5f;
+                        stateTimer = tiredTime;
                         if (tiredFx) tiredFx.SetActive(true);
-                        GameManager.ShowMessage("Kralj se umorio! Skoči mu na glavu!", 2.5f);
+                        if (crownPoint) crownPoint.targetable = true;
+                        GameManager.ShowMessage("The King is tired! Jump on his head or grab his crown with your tongue!", 2.5f);
                     }
                     else { s = S.Idle; stateTimer = 0.4f + 0.2f * health; }
                 }
@@ -75,26 +89,41 @@ public class ToadKingBoss : BossBase
 
             case S.Tired:
                 if (model) model.localRotation = Quaternion.Euler(Mathf.Sin(Time.time * 3f) * 6f, 0, Mathf.Sin(Time.time * 2f) * 8f);
-                if (IsStomped(3f, top))
+                if (IsStomped(3.4f, top))
                 {
                     frog.Bounce(5.5f);
-                    if (tiredFx) tiredFx.SetActive(false);
-                    if (model) model.localRotation = Quaternion.identity;
-                    jumpsDone = 0;
-                    Hit();
-                    s = S.Idle;
-                    stateTimer = 0.8f;
+                    TiredHit(false);
                 }
                 else if (stateTimer <= 0f)
                 {
-                    if (tiredFx) tiredFx.SetActive(false);
-                    if (model) model.localRotation = Quaternion.identity;
-                    jumpsDone = 0;
-                    s = S.Idle;
+                    EndTired();
                     stateTimer = 0.3f;
                 }
                 break;
         }
+    }
+
+    void TiredHit(bool byTongue)
+    {
+        Hit();
+        if (byTongue && frog)
+        {
+            Vector3 away = PlayerPos - transform.position;
+            away.y = 0;
+            away = away.sqrMagnitude > 0.01f ? away.normalized : -transform.forward;
+            frog.Velocity = away * 10f + Vector3.up * 8f;
+        }
+        EndTired();
+        stateTimer = 1.5f;
+    }
+
+    void EndTired()
+    {
+        if (tiredFx) tiredFx.SetActive(false);
+        if (crownPoint) crownPoint.targetable = false;
+        if (model) model.localRotation = Quaternion.identity;
+        jumpsDone = 0;
+        s = S.Idle;
     }
 
     void StartJump()

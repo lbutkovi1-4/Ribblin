@@ -63,12 +63,16 @@ public static class Kit
         { "LavaGlow", new Color(1f, 0.5f, 0.1f) }, { "LavaPlane", new Color(1f, 0.35f, 0.05f) },
         { "Shock", new Color(0.7f, 1f, 0.9f) }, { "CrystalGlow", new Color(0.3f, 0.95f, 1f) },
         { "CrystalDim", new Color(0.15f, 0.25f, 0.45f) }, { "PortalCore", new Color(0.55f, 0.4f, 1f) },
-        { "FlagOn", new Color(0.3f, 1f, 0.4f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
+        { "FlagOn", new Color(0.3f, 1f, 0.4f) },
+        { "Fish", new Color(1f, 0.55f, 0.2f) }, { "FishBlue", new Color(0.3f, 0.6f, 1f) },
+        { "Snake", new Color(0.35f, 0.6f, 0.2f) }, { "SnakeStripe", new Color(0.85f, 0.75f, 0.25f) },
+        { "Flame", new Color(1f, 0.45f, 0.08f) }, { "FlameCore", new Color(1f, 0.85f, 0.3f) },
+        { "Bird", new Color(0.95f, 0.95f, 0.98f) }, { "BirdWing", new Color(0.55f, 0.6f, 0.7f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
     };
 
     static readonly Dictionary<string, float> emissive = new Dictionary<string, float>
     {
-        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f },
+        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Flame", 2.5f }, { "FlameCore", 3f },
         { "CrystalGlow", 3f }, { "PortalCore", 2f }, { "Firefly", 3f }, { "Warning", 1.2f }, { "Tongue", 0.3f },
     };
 
@@ -237,8 +241,10 @@ public static class Kit
     public static Transform FloatIsland(Vector3 top, float radius, string topMat = "Top", string sideMat = "Side")
     {
         var g = RoundGround(top, radius, 1.6f, topMat, sideMat);
-        V(g, PrimitiveType.Sphere, "Under", new Vector3(0, -1.6f, 0), new Vector3(radius * 1.9f, radius * 1.1f, radius * 1.9f), sideMat);
-        V(g, PrimitiveType.Sphere, "Under2", new Vector3(radius * 0.15f, -1.6f - radius * 0.7f, 0), new Vector3(radius, radius * 1.1f, radius), "SideDark");
+        // kamena "kapljica" ispod otoka – cijela ispod gornje površine
+        float h1 = radius * 1.1f;
+        V(g, PrimitiveType.Sphere, "Under", new Vector3(0, -1.4f - h1 * 0.5f, 0), new Vector3(radius * 1.9f, h1, radius * 1.9f), sideMat);
+        V(g, PrimitiveType.Sphere, "Under2", new Vector3(radius * 0.15f, -1.4f - h1 * 0.95f, 0), new Vector3(radius, h1, radius), "SideDark");
         return g;
     }
 
@@ -530,6 +536,115 @@ public static class Kit
         return root;
     }
 
+    // ---------- životinje i ukrasi ----------
+
+    public static void Music(string track)
+    {
+        new GameObject("Music").AddComponent<MusicPlayer>().trackName = track;
+    }
+
+    public static void Fish(Vector3 home, float waterY, string mat = "Fish")
+    {
+        var g = Group("Fish", home);
+        var model = Group("Model", home, g);
+        model.localScale = Vector3.one * 1.8f;
+        V(model, PrimitiveType.Sphere, "Body", Vector3.zero, new Vector3(0.45f, 0.55f, 1.1f), mat);
+        V(model, PrimitiveType.Cube, "Tail", new Vector3(0, 0, -0.62f), new Vector3(0.06f, 0.5f, 0.35f), mat, new Vector3(0, 0, 0));
+        V(model, PrimitiveType.Cube, "Fin", new Vector3(0, 0.3f, 0), new Vector3(0.05f, 0.25f, 0.4f), mat);
+        V(model, PrimitiveType.Sphere, "Eye", new Vector3(0.18f, 0.08f, 0.35f), Vector3.one * 0.12f, "Black");
+        V(model, PrimitiveType.Sphere, "Eye", new Vector3(-0.18f, 0.08f, 0.35f), Vector3.one * 0.12f, "Black");
+        var f = g.gameObject.AddComponent<JumpingFish>();
+        f.waterY = waterY;
+        f.model = model;
+    }
+
+    public static void BeachCrab(Vector3 pos, float radius)
+    {
+        var g = Group("BeachCrab", pos);
+        var model = Group("Model", pos, g);
+        V(model, PrimitiveType.Sphere, "Shell", new Vector3(0, 0.25f, 0), new Vector3(0.7f, 0.35f, 0.55f), "Crab");
+        foreach (float sx in new[] { -1f, 1f })
+        {
+            V(model, PrimitiveType.Sphere, "Claw", new Vector3(sx * 0.45f, 0.28f, 0.3f), new Vector3(0.25f, 0.2f, 0.3f), "Crab");
+            V(model, PrimitiveType.Sphere, "Eye", new Vector3(sx * 0.12f, 0.5f, 0.2f), Vector3.one * 0.1f, "Black");
+            for (int i = 0; i < 2; i++)
+                V(model, PrimitiveType.Cube, "Leg", new Vector3(sx * 0.4f, 0.1f, -0.1f + i * 0.18f), new Vector3(0.3f, 0.05f, 0.05f), "CrabDark", new Vector3(0, 0, sx * 30));
+        }
+        var c = g.gameObject.AddComponent<Critter>();
+        c.radius = radius;
+        c.speed = 1.8f;
+        c.sideways = true;
+        c.model = model;
+    }
+
+    public static void Turtle(Vector3 pos, float radius)
+    {
+        var g = Group("Turtle", pos);
+        var model = Group("Model", pos, g);
+        V(model, PrimitiveType.Sphere, "Shell", new Vector3(0, 0.3f, 0), new Vector3(0.9f, 0.45f, 1.1f), "LeafDark");
+        V(model, PrimitiveType.Sphere, "Head", new Vector3(0, 0.25f, 0.65f), new Vector3(0.3f, 0.25f, 0.35f), "Leaf");
+        foreach (float sx in new[] { -1f, 1f })
+            foreach (float sz in new[] { -1f, 1f })
+                V(model, PrimitiveType.Sphere, "Leg", new Vector3(sx * 0.4f, 0.1f, sz * 0.35f), new Vector3(0.22f, 0.15f, 0.3f), "Leaf");
+        var c = g.gameObject.AddComponent<Critter>();
+        c.radius = radius;
+        c.speed = 0.5f;
+        c.model = model;
+    }
+
+    public static void Snake(Vector3 pos, float radius)
+    {
+        var g = Group("Snake", pos);
+        var segs = new List<Transform>();
+        int n = 9;
+        for (int i = 0; i < n; i++)
+        {
+            float sz = i == 0 ? 0.42f : Mathf.Lerp(0.36f, 0.16f, i / (float)n);
+            var seg = Group(i == 0 ? "Head" : "Body", pos, g);
+            V(seg, PrimitiveType.Sphere, "Ball", new Vector3(0, sz * 0.45f, 0), new Vector3(sz, sz * 0.8f, sz * (i == 0 ? 1.3f : 1f)), i % 2 == 0 ? "Snake" : "SnakeStripe");
+            if (i == 0)
+            {
+                V(seg, PrimitiveType.Sphere, "Eye", new Vector3(0.12f, 0.3f, 0.15f), Vector3.one * 0.1f, "Yellow");
+                V(seg, PrimitiveType.Sphere, "Eye", new Vector3(-0.12f, 0.3f, 0.15f), Vector3.one * 0.1f, "Yellow");
+                V(seg, PrimitiveType.Cube, "Tongue", new Vector3(0, 0.15f, 0.35f), new Vector3(0.05f, 0.02f, 0.2f), "Red");
+            }
+            segs.Add(seg);
+        }
+        var sn = g.gameObject.AddComponent<Snake>();
+        sn.segments = segs.ToArray();
+        sn.radius = radius;
+    }
+
+    public static void Flame(Vector3 pos, float size = 1f)
+    {
+        var g = Group("Flame", pos);
+        var parts = new List<Transform>();
+        parts.Add(V(g, PrimitiveType.Sphere, "Outer", new Vector3(0, 0.6f, 0) * size, new Vector3(0.9f, 1.5f, 0.9f) * size, "Flame").transform);
+        parts.Add(V(g, PrimitiveType.Sphere, "Inner", new Vector3(0, 0.5f, 0) * size, new Vector3(0.5f, 0.9f, 0.5f) * size, "FlameCore").transform);
+        parts.Add(V(g, PrimitiveType.Sphere, "Tip", new Vector3(0.1f, 1.3f, 0) * size, new Vector3(0.35f, 0.6f, 0.35f) * size, "Flame").transform);
+        foreach (var t in parts) t.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        g.gameObject.AddComponent<Flame>().parts = parts.ToArray();
+    }
+
+    public static void Bird(Vector3 center, float radius, float height, float speed)
+    {
+        var g = Group("Bird", center + new Vector3(radius, height, 0));
+        V(g, PrimitiveType.Sphere, "Body", Vector3.zero, new Vector3(0.45f, 0.4f, 1.0f), "Bird");
+        V(g, PrimitiveType.Sphere, "Head", new Vector3(0, 0.12f, 0.5f), Vector3.one * 0.32f, "Bird");
+        V(g, PrimitiveType.Cube, "Beak", new Vector3(0, 0.1f, 0.72f), new Vector3(0.08f, 0.06f, 0.2f), "Orange");
+        var wl = Group("WingL", g.position, g); wl.localPosition = new Vector3(-0.2f, 0.1f, 0);
+        var wr = Group("WingR", g.position, g); wr.localPosition = new Vector3(0.2f, 0.1f, 0);
+        V(wl, PrimitiveType.Cube, "Wing", new Vector3(-0.6f, 0, 0), new Vector3(1.2f, 0.05f, 0.45f), "BirdWing");
+        V(wr, PrimitiveType.Cube, "Wing", new Vector3(0.6f, 0, 0), new Vector3(1.2f, 0.05f, 0.45f), "BirdWing");
+        var b = g.gameObject.AddComponent<FlyingBird>();
+        b.center = center;
+        b.radius = radius;
+        b.height = height;
+        b.speed = speed;
+        b.wingL = wl;
+        b.wingR = wr;
+    }
+
     // ---------- žabica, kamera, game manager ----------
 
     public static Transform FrogModel(Transform parent)
@@ -553,7 +668,7 @@ public static class Kit
         return model;
     }
 
-    public static GameObject Player(Vector3 spawn, float respawnY, string title, string subtitle, string next, int required, bool showControls)
+    public static GameObject Player(Vector3 spawn, float respawnY, string title, string subtitle, string next, int required, bool showControls, string music)
     {
         var frog = new GameObject("Ribblin_Frog");
         frog.transform.position = spawn;
@@ -582,6 +697,7 @@ public static class Kit
         gm.fruitRequired = required;
         gm.showControls = showControls;
         gm.fxMaterials = FxMaterials();
+        Music(music);
         return frog;
     }
 }

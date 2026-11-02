@@ -36,7 +36,7 @@ public class CrabBoss : BossBase
             Sfx.Play("stomp", 0.5f);
             if (hardShellHint <= 0f)
             {
-                GameManager.ShowMessage("Oklop je pretvrd! Navedi ga da se zabije u kameni stup.", 3f);
+                GameManager.ShowMessage("His shell is too hard! Make him crash into a stone pillar.", 3f);
                 hardShellHint = 4f;
             }
             return;
@@ -83,7 +83,7 @@ public class CrabBoss : BossBase
                             ThirdPersonCamera.Shake(0.5f);
                             Fx.Puff(p + Vector3.up * 2f, "Dust", 3f);
                             if (stunStars) stunStars.SetActive(true);
-                            GameManager.ShowMessage("Ošamućen je! Skoči mu na glavu!", 2.5f);
+                            GameManager.ShowMessage("He is dizzy! Jump on his head!", 2.5f);
                             return;
                         }
                     }

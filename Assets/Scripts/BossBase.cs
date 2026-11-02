@@ -103,7 +103,7 @@ public abstract class BossBase : MonoBehaviour
         dead = true;
         SetVisible(true);
         Sfx.Play("win", 0.7f);
-        GameManager.ShowMessage(bossName + " je pobijeđen! Uđi u portal.", 6f);
+        GameManager.ShowMessage(bossName + " is defeated! Enter the portal.", 6f);
         if (portal) portal.SetActive(true);
         GameStats.BossesDefeated++;
     }
@@ -127,7 +127,7 @@ public abstract class BossBase : MonoBehaviour
     {
         if (!frog) return false;
         Vector3 p = frog.transform.position;
-        return Flat(p, transform.position) < radius && p.y > topY - 0.7f && p.y < topY + 1.2f && frog.Velocity.y < 0.5f && !frog.IsGrounded;
+        return Flat(p, transform.position) < radius && p.y > topY - 1.0f && p.y < topY + 1.5f && frog.Velocity.y < 0.5f && !frog.IsGrounded;
     }
 
     protected void FaceTowards(Vector3 p, float speed)

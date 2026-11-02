@@ -62,7 +62,7 @@ public class GolemBoss : BossBase
                         stateTimer = overheatTime;
                         SetCrystals(true);
                         Sfx.Play("roar", 0.6f);
-                        GameManager.ShowMessage("Magmor se pregrijao! Uhvati jezikom svijetleći kristal!", 3f);
+                        GameManager.ShowMessage("Magmor is overheating! Grab a glowing crystal with your tongue!", 3f);
                     }
                 }
                 break;

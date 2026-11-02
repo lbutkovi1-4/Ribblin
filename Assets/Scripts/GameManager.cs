@@ -13,7 +13,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Level")]
     public string levelTitle = "Level 1";
-    public string levelSubtitle = "Tropski otok";
+    public string levelSubtitle = "Tropical Island";
     public string nextScene = "";
     public string menuScene = "Ribblin_Menu";
     public int fruitRequired = 10;
@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     {
         titleUntil = Time.time + 3.5f;
         if (showControls)
-            ShowMessage("WASD kretanje · Space skok (2x) · Shift trčanje · Miš kamera · Lijevi klik jezik · Esc pauza", 9f);
+            ShowMessage("WASD move · Space jump (x2) · Shift run · Mouse camera · Left click tongue · Esc pause", 9f);
         LockCursor(true);
         grapple = FindAnyObjectByType<TongueGrapple>();
     }
@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
         Sfx.Play("collect", 0.5f);
         if (Instance.collected == Instance.fruitRequired)
         {
-            ShowMessage("Skupila si dovoljno voća – put do bossa je otključan!", 3.5f);
+            ShowMessage("You collected enough fruit – the path to the boss is unlocked!", 3.5f);
             Sfx.Play("unlock", 0.6f);
         }
     }
@@ -162,10 +162,10 @@ public class GameManager : MonoBehaviour
         }
 
         // voće i vrijeme
-        string goal = collected >= fruitRequired ? "  – boss otključan!" : $"  (za bossa: {fruitRequired})";
-        Ui.Text(new Rect(28 * s, 74 * s, 900 * s, 50 * s), $"Voće: {collected} / {total}{goal}", big);
+        string goal = collected >= fruitRequired ? "  – boss unlocked!" : $"  (boss needs {fruitRequired})";
+        Ui.Text(new Rect(28 * s, 74 * s, 900 * s, 50 * s), $"Fruit: {collected} / {total}{goal}", big);
         int m = (int)(timer / 60), sec = (int)(timer % 60);
-        Ui.Text(new Rect(28 * s, 116 * s, 500 * s, 50 * s), $"Vrijeme: {m:00}:{sec:00}", Ui.Label(28));
+        Ui.Text(new Rect(28 * s, 116 * s, 500 * s, 50 * s), $"Time: {m:00}:{sec:00}", Ui.Label(28));
 
         // nišan
         if (!Paused && !LevelDone)
@@ -209,14 +209,14 @@ public class GameManager : MonoBehaviour
         if (Paused)
         {
             Ui.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0, 0, 0, 0.55f));
-            Ui.Text(Ui.Centered(250, 900, 100), "PAUZA", Ui.Label(80, TextAnchor.MiddleCenter));
-            if (Ui.Button(Ui.Centered(420, 460, 80), "Nastavi")) SetPaused(false);
-            if (Ui.Button(Ui.Centered(520, 460, 80), "Ponovi level"))
+            Ui.Text(Ui.Centered(250, 900, 100), "PAUSED", Ui.Label(80, TextAnchor.MiddleCenter));
+            if (Ui.Button(Ui.Centered(420, 460, 80), "Resume")) SetPaused(false);
+            if (Ui.Button(Ui.Centered(520, 460, 80), "Restart level"))
             {
                 SetPaused(false);
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
-            if (Ui.Button(Ui.Centered(620, 460, 80), "Glavni izbornik"))
+            if (Ui.Button(Ui.Centered(620, 460, 80), "Main menu"))
             {
                 SetPaused(false);
                 SceneManager.LoadScene(menuScene);
@@ -227,8 +227,8 @@ public class GameManager : MonoBehaviour
         if (LevelDone)
         {
             Ui.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0.1f, 0.3f, 0.15f, 0.55f));
-            Ui.Text(Ui.Centered(300, 1200, 110), $"{levelTitle} završen!", Ui.Label(84, TextAnchor.MiddleCenter), new Color(1f, 0.9f, 0.4f));
-            Ui.Text(Ui.Centered(430, 1200, 60), $"Voće: {collected} / {total}     Vrijeme: {m:00}:{sec:00}", Ui.Label(40, TextAnchor.MiddleCenter));
+            Ui.Text(Ui.Centered(300, 1200, 110), $"{levelTitle} complete!", Ui.Label(84, TextAnchor.MiddleCenter), new Color(1f, 0.9f, 0.4f));
+            Ui.Text(Ui.Centered(430, 1200, 60), $"Fruit: {collected} / {total}     Time: {m:00}:{sec:00}", Ui.Label(40, TextAnchor.MiddleCenter));
         }
     }
 }

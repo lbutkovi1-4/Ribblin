@@ -61,7 +61,7 @@ public class PlayerHealth : MonoBehaviour
     void Die()
     {
         GameStats.Deaths++;
-        GameManager.ShowMessage("Jao! Pokušaj ponovno od zadnje zastavice.", 2.5f);
+        GameManager.ShowMessage("Ouch! Back to the last checkpoint.", 2.5f);
         Hearts = maxHearts;
         frog.Respawn();
         invuln = invulnTime;

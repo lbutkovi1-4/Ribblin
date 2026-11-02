@@ -65,7 +65,7 @@ public static class RibblinLevelBuilder
     }
 
     // =====================================================================
-    // LEVEL 1 – TROPSKI OTOK   (boss: Kapetan Klješto)
+    // LEVEL 1 – TROPSKI OTOK   (boss: Captain Pinchbeard)
     // =====================================================================
     static void BuildLevel1()
     {
@@ -149,6 +149,36 @@ public static class RibblinLevelBuilder
         Kit.P(PrimitiveType.Cylinder, "Buoy", null, new Vector3(22, -0.2f, 40), new Vector3(1.4f, 0.8f, 1.4f), "Red");
         Kit.P(PrimitiveType.Cylinder, "BuoyTop", null, new Vector3(22, 1.0f, 40), new Vector3(0.5f, 0.5f, 0.5f), "White");
 
+        // ribe koje skaču oko otoka i galebovi
+        Vector3[] fishSpots =
+        {
+            new Vector3(35, 0, 20), new Vector3(35, 0, -20), new Vector3(-35, 0, 20), new Vector3(-35, 0, -30),
+            new Vector3(20, 0, 35), new Vector3(-20, 0, 35), new Vector3(20, 0, -38), new Vector3(-20, 0, -38),
+            new Vector3(38, 0, -35), new Vector3(-38, 0, 38), new Vector3(12, 0, -36), new Vector3(-12, 0, -40),
+            new Vector3(60, 0, 12), new Vector3(66, 0, -14),
+        };
+        for (int i = 0; i < fishSpots.Length; i++)
+            Kit.Fish(fishSpots[i], -0.3f, i % 3 == 0 ? "FishBlue" : "Fish");
+        // ribe tik uz obalu – dobro se vide s otoka
+        Vector3[] shoreFish =
+        {
+            new Vector3(33, 0, -10), new Vector3(33, 0, 12), new Vector3(-33, 0, 8), new Vector3(-33, 0, -16),
+            new Vector3(10, 0, 33), new Vector3(-12, 0, 33), new Vector3(-8, 0, -33), new Vector3(16, 0, -33),
+            new Vector3(5, 0, 40), new Vector3(-40, 0, 2),
+        };
+        for (int i = 0; i < shoreFish.Length; i++)
+            Kit.Fish(shoreFish[i], -0.3f, i % 2 == 0 ? "Fish" : "FishBlue");
+
+        // rakovi i kornjače na plaži
+        foreach (var cp in new[] { new Vector3(27.5f, 0.3f, 6), new Vector3(-27.5f, 0.3f, -12), new Vector3(8, 0.3f, -27.5f),
+                                   new Vector3(-14, 0.3f, 27.5f), new Vector3(27.5f, 0.3f, -22), new Vector3(-2, 0.4f, 44) })
+            Kit.BeachCrab(cp, 2f);
+        Kit.Turtle(new Vector3(-27.5f, 0.3f, 14), 1.5f);
+        Kit.Turtle(new Vector3(20, 0.3f, 27.5f), 1.5f);
+        Kit.Turtle(new Vector3(1, 0.6f, -56), 1.5f);
+        for (int i = 0; i < 5; i++)
+            Kit.Bird(new Vector3(0, 0, 0), Random.Range(30f, 45f), Random.Range(14f, 22f), Random.Range(0.12f, 0.25f));
+
         // voće (21)
         Vector3[] fruits =
         {
@@ -189,7 +219,7 @@ public static class RibblinLevelBuilder
         var portal = Kit.Portal(arena + new Vector3(10, 0, 0), "Level2_Mocvara", arena);
         BuildCrab(arena, pillars.ToArray(), portal);
 
-        Kit.Player(new Vector3(0, 0.7f, -20), -1.2f, "Level 1", "Tropski otok", "Level2_Mocvara", required, true);
+        Kit.Player(new Vector3(0, 0.7f, -20), -1.2f, "Level 1", "Tropical Island", "Level2_Mocvara", required, true, "Level1");
         Save(scene, "Level1_Otok");
     }
 
@@ -234,7 +264,7 @@ public static class RibblinLevelBuilder
         stars.gameObject.SetActive(false);
 
         var boss = root.gameObject.AddComponent<CrabBoss>();
-        boss.bossName = "Kapetan Klješto";
+        boss.bossName = "Captain Pinchbeard";
         boss.maxHealth = 3;
         boss.arenaCenter = pos;
         boss.arenaRadius = 15f;
@@ -242,11 +272,11 @@ public static class RibblinLevelBuilder
         boss.pillars = pillars;
         boss.model = model;
         boss.stunStars = stars.gameObject;
-        boss.hint = "Navedi Kapetana da se zabije u kameni stup, pa mu skoči na glavu!";
+        boss.hint = "Lure the Captain into a stone pillar, then jump on his head!";
     }
 
     // =====================================================================
-    // LEVEL 2 – MOČVARA   (boss: Kralj Krastača)
+    // LEVEL 2 – MOČVARA   (boss: King Croakus)
     // =====================================================================
     static void BuildLevel2()
     {
@@ -359,13 +389,17 @@ public static class RibblinLevelBuilder
         var portal = Kit.Portal(arena + new Vector3(0, 0, 11), "Level3_Vulkan", arena);
         BuildToad(arena + new Vector3(0, 0, 4), arena, portal);
 
+        // zmije uz rubove otoka
+        foreach (var sp in new[] { new Vector3(-5, 1, -4), new Vector3(5, 1, 33), new Vector3(-4, 1, 64), new Vector3(5, 1, 96), new Vector3(10, 1, 132), new Vector3(-10, 1, 143) })
+            Kit.Snake(sp, 2.5f);
+
         // krijesnice i trska
         for (int i = 0; i < 40; i++)
             Kit.Firefly(new Vector3(Random.Range(-15f, 15f), Random.Range(1.5f, 5f), Random.Range(-5f, 150f)));
         for (int i = 0; i < 14; i++)
             Kit.Reeds(new Vector3(Random.Range(-25f, 25f), 0, Random.Range(0f, 150f)) + Vector3.right * (Random.value > 0.5f ? 12f : -12f));
 
-        Kit.Player(new Vector3(0, 1.1f, -4), -0.6f, "Level 2", "Močvara", "Level3_Vulkan", required, false);
+        Kit.Player(new Vector3(0, 1.1f, -4), -0.6f, "Level 2", "Murky Swamp", "Level3_Vulkan", required, false, "Level2");
         Save(scene, "Level2_Mocvara");
     }
 
@@ -403,19 +437,31 @@ public static class RibblinLevelBuilder
         }
         tired.gameObject.SetActive(false);
 
+        model.localScale = Vector3.one * 0.8f;
+        var crown = Kit.Group("CrownPoint", pos, model);
+        crown.localPosition = new Vector3(0, 4.4f, -0.1f);
+        var cvis = Kit.Group("Visual", pos, crown);
+        cvis.localPosition = Vector3.zero;
+        Kit.V(cvis, PrimitiveType.Sphere, "Orb", Vector3.zero, Vector3.one * 0.7f, "CrystalGlow");
+        var crownGp = crown.gameObject.AddComponent<GrapplePoint>();
+        crownGp.visual = cvis;
+        crownGp.bob = false;
+        crownGp.targetable = false;
+
         var boss = root.gameObject.AddComponent<ToadKingBoss>();
-        boss.bossName = "Kralj Krastača";
+        boss.crownPoint = crownGp;
+        boss.bossName = "King Croakus";
         boss.maxHealth = 3;
         boss.arenaCenter = arena;
         boss.arenaRadius = 15f;
         boss.portal = portal;
         boss.model = model;
         boss.tiredFx = tired.gameObject;
-        boss.hint = "Preskoči udarne valove! Kad se Kralj umori, skoči mu na glavu.";
+        boss.hint = "Jump over the shockwaves! When the King gets tired, jump on his head or grab his crown with your tongue.";
     }
 
     // =====================================================================
-    // LEVEL 3 – VULKAN   (boss: Magmor)
+    // LEVEL 3 – VULKAN   (boss: Magmor the Molten)
     // =====================================================================
     static void BuildLevel3()
     {
@@ -523,7 +569,24 @@ public static class RibblinLevelBuilder
         var portal = Kit.Portal(arena + new Vector3(0, 0, 12), "Level4_Nebo", arena);
         BuildGolem(arena, portal);
 
-        Kit.Player(new Vector3(0, 3.1f, -4), 0.5f, "Level 3", "Vulkan", "Level4_Nebo", required, false);
+        // plamenovi na rubovima i u lavi
+        foreach (var fp in new[] {
+            new Vector3(-6.5f, 3, 6), new Vector3(6.5f, 3, -6), new Vector3(-5.5f, 6.5f, 44.5f), new Vector3(5.5f, 6.5f, 35.5f),
+            new Vector3(-6.5f, 6.5f, 77.5f), new Vector3(6.5f, 6.5f, 66.5f), new Vector3(6.5f, 15, 91.5f), new Vector3(-6.5f, 15, 81),
+            new Vector3(4.5f, 15, 118.5f), new Vector3(-4.5f, 15, 109.5f) })
+            Kit.Flame(fp, 1f);
+        for (int i = 0; i < 30; i++)
+        {
+            float x = Random.Range(10f, 40f) * (Random.value > 0.5f ? 1f : -1f);
+            Kit.Flame(new Vector3(x, 0f, Random.Range(-10f, 170f)), Random.Range(1.2f, 2.5f));
+        }
+        for (int i = 0; i < 12; i++)
+        {
+            float a2 = i / 12f * Mathf.PI * 2f;
+            Kit.Flame(arena + new Vector3(Mathf.Cos(a2), 0, Mathf.Sin(a2)) * 15.3f, 0.9f);
+        }
+
+        Kit.Player(new Vector3(0, 3.1f, -4), 0.5f, "Level 3", "Volcano", "Level4_Nebo", required, false, "Level3");
         Save(scene, "Level3_Vulkan");
     }
 
@@ -564,7 +627,7 @@ public static class RibblinLevelBuilder
         }
 
         var boss = root.gameObject.AddComponent<GolemBoss>();
-        boss.bossName = "Magmor";
+        boss.bossName = "Magmor the Molten";
         boss.maxHealth = 3;
         boss.arenaCenter = pos;
         boss.arenaRadius = 16f;
@@ -572,11 +635,11 @@ public static class RibblinLevelBuilder
         boss.model = model;
         boss.throwHand = hand.transform;
         boss.crystals = crystals.ToArray();
-        boss.hint = "Izbjegavaj crvene krugove! Kad se Magmor pregrije, uhvati jezikom svijetleći kristal na njemu.";
+        boss.hint = "Stay out of the red circles! When Magmor overheats, grab a glowing crystal on him with your tongue.";
     }
 
     // =====================================================================
-    // LEVEL 4 – NEBO   (boss: Oluja)
+    // LEVEL 4 – NEBO   (boss: Tempestra)
     // =====================================================================
     static void BuildLevel4()
     {
@@ -588,14 +651,20 @@ public static class RibblinLevelBuilder
             sun = new Color(1f, 0.97f, 0.9f), sunIntensity = 1.4f, sunEuler = new Vector3(55, -20, 0),
         };
         t.colors["Top"] = new Color(0.55f, 0.85f, 0.45f);
-        t.colors["Side"] = new Color(0.85f, 0.8f, 0.72f);
-        t.colors["SideDark"] = new Color(0.7f, 0.64f, 0.58f);
-        t.colors["Rock"] = new Color(0.85f, 0.85f, 0.9f);
+        t.colors["Side"] = new Color(0.62f, 0.5f, 0.42f);
+        t.colors["SideDark"] = new Color(0.45f, 0.36f, 0.3f);
+        t.colors["Rock"] = new Color(0.75f, 0.72f, 0.8f);
         var scene = Kit.NewScene(t);
 
         // more oblaka ispod
-        for (int i = 0; i < 70; i++)
-            Kit.Cloud(new Vector3(Random.Range(-70f, 70f), Random.Range(-9f, -5f), Random.Range(-40f, 200f)), Random.Range(2f, 4f));
+        // oblaci samo sa strane (daleko od staze i arene), nikad ispod platformi
+        for (int i = 0; i < 50; i++)
+        {
+            float x = Random.Range(32f, 80f) * (Random.value > 0.5f ? 1f : -1f);
+            Kit.Cloud(new Vector3(x, Random.Range(-4f, 14f), Random.Range(-40f, 200f)), Random.Range(2f, 4f));
+        }
+        for (int i = 0; i < 8; i++)
+            Kit.Bird(new Vector3(-3, 0, 80), Random.Range(40f, 60f), Random.Range(18f, 32f), Random.Range(0.1f, 0.2f));
 
         // S0 – start
         Kit.FloatIsland(new Vector3(0, 10, 0), 8f);
@@ -634,8 +703,8 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(-11, 21, 90));
 
         // S5 – pokretni oblaci
-        Kit.Mover(new Vector3(-10, 20, 103.5f), new Vector3(3, 0.6f, 3), new Vector3(8, 0, 0), 4f, 0f, "Cloud", "Cloud");
-        Kit.Mover(new Vector3(-2, 20, 109), new Vector3(3, 0.6f, 3), new Vector3(-8, 0, 0), 4f, 0f, "Cloud", "Cloud");
+        Kit.Mover(new Vector3(-10, 20, 103.5f), new Vector3(3, 0.6f, 3), new Vector3(8, 0, 0), 4f, 0f, "Top", "Side");
+        Kit.Mover(new Vector3(-2, 20, 109), new Vector3(3, 0.6f, 3), new Vector3(-8, 0, 0), 4f, 0f, "Top", "Side");
         Kit.Fruit(new Vector3(-6, 21.8f, 106));
 
         // S6 – ispred bossa + bonus otočić
@@ -668,7 +737,7 @@ public static class RibblinLevelBuilder
         var portal = Kit.Portal(arena + new Vector3(0, 0, 12), "Ribblin_End", arena);
         BuildBird(arena, portal);
 
-        Kit.Player(new Vector3(0, 10.1f, -4), -12f, "Level 4", "Nebo", "Ribblin_End", required, false);
+        Kit.Player(new Vector3(0, 10.1f, -4), -12f, "Level 4", "Sky Islands", "Ribblin_End", required, false, "Level4");
         Save(scene, "Level4_Nebo");
     }
 
@@ -701,7 +770,7 @@ public static class RibblinLevelBuilder
         gp.targetable = false;
 
         var boss = root.gameObject.AddComponent<StormBirdBoss>();
-        boss.bossName = "Oluja";
+        boss.bossName = "Tempestra, Queen of Storms";
         boss.maxHealth = 4;
         boss.arenaCenter = arena;
         boss.arenaRadius = 16f;
@@ -710,7 +779,7 @@ public static class RibblinLevelBuilder
         boss.wingL = wingL;
         boss.wingR = wingR;
         boss.backPoint = gp;
-        boss.hint = "Bježi iz crvenih krugova! Kad se Oluja spusti ošamućena, skoči na nju ili je uhvati jezikom.";
+        boss.hint = "Run from the red circles! When Tempestra lands dizzy, jump on her or grab her with your tongue.";
     }
 
     // =====================================================================
@@ -738,6 +807,7 @@ public static class RibblinLevelBuilder
         orbit.radius = 14f;
         orbit.height = 5f;
         new GameObject("Menu").AddComponent<MainMenuUI>();
+        Kit.Music("Menu");
         Save(scene, "Ribblin_Menu");
     }
 
@@ -771,6 +841,7 @@ public static class RibblinLevelBuilder
         orbit.radius = 12f;
         orbit.height = 4f;
         new GameObject("End").AddComponent<EndScreenUI>();
+        Kit.Music("End");
         Save(scene, "Ribblin_End");
     }
 }

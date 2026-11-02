@@ -98,7 +98,7 @@ public class StormBirdBoss : BossBase
                         Sfx.Play("stomp", 0.9f);
                         ThirdPersonCamera.Shake(0.5f);
                         Fx.Puff(transform.position, "Dust", 4f);
-                        GameManager.ShowMessage("Oluja je ošamućena! Skoči na nju ili je uhvati jezikom!", 3f);
+                        GameManager.ShowMessage("The storm bird is dizzy! Jump on her or grab her with your tongue!", 3f);
                     }
                 }
                 break;

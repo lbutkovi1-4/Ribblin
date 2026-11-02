@@ -18,20 +18,20 @@ public class EndScreenUI : MonoBehaviour
     void OnGUI()
     {
         float s = Ui.S;
-        Ui.Text(new Rect(0, 100 * s, Screen.width, 160 * s), "POBJEDA!", Ui.Label(140, TextAnchor.MiddleCenter), new Color(1f, 0.85f, 0.3f));
-        Ui.Text(new Rect(0, 260 * s, Screen.width, 60 * s), "Ribblin je spasio sve otoke!", Ui.Label(46, TextAnchor.MiddleCenter));
+        Ui.Text(new Rect(0, 100 * s, Screen.width, 160 * s), "VICTORY!", Ui.Label(140, TextAnchor.MiddleCenter), new Color(1f, 0.85f, 0.3f));
+        Ui.Text(new Rect(0, 260 * s, Screen.width, 60 * s), "Ribblin saved all the islands!", Ui.Label(46, TextAnchor.MiddleCenter));
 
         int m = (int)(GameStats.TotalTime / 60), sec = (int)(GameStats.TotalTime % 60);
         var r = Ui.Centered(370, 820, 300);
         Ui.Box(r, new Color(0, 0, 0, 0.45f));
         Ui.Text(r,
-            $"Ukupno vrijeme: {m:00}:{sec:00}\n" +
-            $"Voće: {GameStats.FruitCollected} / {GameStats.FruitTotal}\n" +
-            $"Pobijeđeni bossovi: {GameStats.BossesDefeated}\n" +
-            $"Padovi: {GameStats.Deaths}",
+            $"Total time: {m:00}:{sec:00}\n" +
+            $"Fruit: {GameStats.FruitCollected} / {GameStats.FruitTotal}\n" +
+            $"Bosses defeated: {GameStats.BossesDefeated}\n" +
+            $"Falls: {GameStats.Deaths}",
             Ui.Label(40, TextAnchor.MiddleCenter));
 
-        if (Ui.Button(Ui.Centered(720, 460, 85), "Glavni izbornik")) SceneManager.LoadScene(menuScene);
-        if (Ui.Button(Ui.Centered(825, 460, 85), "Izlaz")) Application.Quit();
+        if (Ui.Button(Ui.Centered(720, 460, 85), "Main menu")) SceneManager.LoadScene(menuScene);
+        if (Ui.Button(Ui.Centered(825, 460, 85), "Quit")) Application.Quit();
     }
 }
