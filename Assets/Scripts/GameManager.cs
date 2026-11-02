@@ -162,7 +162,8 @@ public class GameManager : MonoBehaviour
         }
 
         // voće i vrijeme
-        string goal = collected >= fruitRequired ? "  – boss unlocked!" : $"  (boss needs {fruitRequired})";
+        string bossName = BossBase.Current ? BossBase.Current.bossName : "Boss";
+        string goal = collected >= fruitRequired ? $"  – {bossName} unlocked!" : $"  ({bossName}: {fruitRequired})";
         Ui.Text(new Rect(28 * s, 74 * s, 900 * s, 50 * s), $"Fruit: {collected} / {total}{goal}", big);
         int m = (int)(timer / 60), sec = (int)(timer % 60);
         Ui.Text(new Rect(28 * s, 116 * s, 500 * s, 50 * s), $"Time: {m:00}:{sec:00}", Ui.Label(28));

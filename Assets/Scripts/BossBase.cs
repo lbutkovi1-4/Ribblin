@@ -26,6 +26,8 @@ public abstract class BossBase : MonoBehaviour
 
     protected Vector3 PlayerPos => frog ? frog.transform.position : transform.position;
 
+    protected virtual void Awake() { Current = this; }
+
     protected virtual void Start()
     {
         Current = this;

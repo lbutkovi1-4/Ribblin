@@ -171,7 +171,7 @@ public static class RibblinLevelBuilder
 
         // rakovi i kornjače na plaži
         foreach (var cp in new[] { new Vector3(27.5f, 0.3f, 6), new Vector3(-27.5f, 0.3f, -12), new Vector3(8, 0.3f, -27.5f),
-                                   new Vector3(-14, 0.3f, 27.5f), new Vector3(27.5f, 0.3f, -22), new Vector3(-2, 0.4f, 44) })
+                                   new Vector3(-14, 0.3f, 27.5f), new Vector3(27.5f, 0.3f, -22), new Vector3(-5.8f, 0.4f, 46) })
             Kit.BeachCrab(cp, 2f);
         Kit.Turtle(new Vector3(-27.5f, 0.3f, 14), 1.5f);
         Kit.Turtle(new Vector3(20, 0.3f, 27.5f), 1.5f);
@@ -193,7 +193,7 @@ public static class RibblinLevelBuilder
             new Vector3(19, 1.4f, -19),
         };
         foreach (var f in fruits) Kit.Fruit(f);
-        int required = 14;
+        int required = 14;   // Level 1: 14 od 21
 
         // put do bossa (istok)
         Kit.Grapple(new Vector3(36, 6f, 0));
@@ -370,7 +370,7 @@ public static class RibblinLevelBuilder
         Kit.MushroomDeco(new Vector3(6, 1, 96), 1.2f);
         Kit.MushroomDeco(new Vector3(-6, 1, 98), 0.9f);
 
-        int required = 12;
+        int required = 13;   // Level 2: 13 od 17
         // put do bossa
         Kit.Checkpoint(new Vector3(3, 1, 106), true);
         Kit.Grapple(new Vector3(0, 6.5f, 114), required);
@@ -553,7 +553,7 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(0, 8f, 50));
         Kit.Fruit(new Vector3(-5, 6f, 2));
         Kit.Fruit(new Vector3(0, 16, 112));
-        int required = 12;
+        int required = 16;   // Level 3: 16 od 18
         Kit.Grapple(new Vector3(0, 20f, 125), required);
         Kit.Grapple(new Vector3(0, 20.5f, 131), required);
 
@@ -721,7 +721,7 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(10, 18, 47));
         Kit.Fruit(new Vector3(4, 16.5f, 26));
         Kit.Fruit(new Vector3(-2, 21.8f, 109));
-        int required = 11;
+        int required = Kit.FruitCount;   // Level 4: SVE voće
         Kit.Grapple(new Vector3(-6, 25f, 128), required);
         Kit.Grapple(new Vector3(-6, 25.5f, 134), required);
 
