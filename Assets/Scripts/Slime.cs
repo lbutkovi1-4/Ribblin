@@ -12,6 +12,9 @@ public class Slime : MonoBehaviour
     public float wanderRadius = 4f;
     public float chaseRange = 7f;
     public bool chase = true;
+    public bool lunge = false;          // od 3. levela: skoči prema žabici kad je blizu
+    public float lungeRange = 4f;
+    public float lungeSpeed = 8f;
     public Transform model;
 
     Vector3 home;
@@ -21,6 +24,9 @@ public class Slime : MonoBehaviour
     float deadTimer;
     Vector3 baseScale = Vector3.one;
     float seed;
+    float lungeCooldown = 1.5f;
+    float lungeTime;
+    Vector3 lungeDir;
 
     public bool Alive => !dead;
     public Vector3 Center => transform.position + Vector3.up * height * 0.5f;
@@ -55,6 +61,33 @@ public class Slime : MonoBehaviour
         if (GameManager.Paused) return;
 
         var frog = FrogController.Instance;
+
+        // skok prema žabici
+        lungeCooldown -= Time.deltaTime;
+        if (lungeTime > 0f)
+        {
+            lungeTime -= Time.deltaTime;
+            Vector3 np = transform.position + lungeDir * lungeSpeed * Time.deltaTime;
+            Vector3 off2 = np - home; off2.y = 0;
+            if (off2.magnitude <= wanderRadius + 1f) transform.position = np;
+            if (model) model.localPosition = Vector3.up * Mathf.Sin((1f - lungeTime / 0.4f) * Mathf.PI) * 1.2f;
+            CheckPlayer(frog);
+            return;
+        }
+        if (lunge && frog && lungeCooldown <= 0f)
+        {
+            Vector3 d = frog.transform.position - transform.position;
+            if (Mathf.Abs(d.y) < 1.5f && new Vector2(d.x, d.z).magnitude < lungeRange)
+            {
+                d.y = 0;
+                lungeDir = d.normalized;
+                lungeTime = 0.4f;
+                lungeCooldown = Random.Range(1.6f, 2.6f);
+                transform.rotation = Quaternion.LookRotation(lungeDir);
+                return;
+            }
+        }
+
         Vector3 goal = target;
         float spd = speed;
         if (chase && frog)
@@ -88,6 +121,11 @@ public class Slime : MonoBehaviour
             model.localScale = new Vector3(baseScale.x * (1.1f - hop * 0.15f), baseScale.y * (0.85f + hop * 0.25f), baseScale.z * (1.1f - hop * 0.15f));
         }
 
+        CheckPlayer(frog);
+    }
+
+    void CheckPlayer(FrogController frog)
+    {
         if (frog)
         {
             Vector3 fp = frog.transform.position;
