@@ -12,6 +12,11 @@ public abstract class BossBase : MonoBehaviour
     public GameObject portal;
     [TextArea] public string hint = "";
 
+    [Header("Zvukovi bossa")]
+    public string roarSound = "crab_roar";     // kad borba počne
+    public string attackSound = "crab_attack"; // kod napada
+    public string hurtSound = "crab_hurt";     // kad ga pogodiš
+
     protected int health;
     protected FrogController frog;
     protected bool active;
@@ -58,7 +63,8 @@ public abstract class BossBase : MonoBehaviour
                 Mathf.Abs(frog.transform.position.y - arenaCenter.y) < 3f)
             {
                 active = true;
-                Sfx.Play("roar", 0.7f);
+                Sfx.Play(roarSound, 0.9f);
+                MusicPlayer.SetBossMode(true);
                 ThirdPersonCamera.Shake(0.4f);
                 GameManager.ShowMessage(hint, 6f);
                 OnActivate();
@@ -78,6 +84,7 @@ public abstract class BossBase : MonoBehaviour
     }
 
     protected abstract void Tick();
+    protected void Attack(float volume = 0.8f) => Sfx.Play(attackSound, volume);
     protected virtual void OnActivate() { }
     protected virtual void OnHit() { }
 
@@ -87,7 +94,8 @@ public abstract class BossBase : MonoBehaviour
         health--;
         invuln = 0.6f;
         flash = 0.6f;
-        Sfx.Play("bosshit", 0.8f);
+        Sfx.Play("bosshit", 0.7f);
+        Sfx.Play(hurtSound, 0.9f);
         ThirdPersonCamera.Shake(0.5f);
         Fx.Puff(transform.position + Vector3.up * 2f, "Dust", 3f);
         if (health <= 0) Die(); else OnHit();
@@ -104,7 +112,10 @@ public abstract class BossBase : MonoBehaviour
     {
         dead = true;
         SetVisible(true);
+        Sfx.Play(hurtSound, 1f);
         Sfx.Play("win", 0.7f);
+        MusicPlayer.SetBossMode(false);
+        Fx.Burst(transform.position + Vector3.up * 2f, "Gold", 30, 2f);
         GameManager.ShowMessage(bossName + " is defeated! Enter the portal.", 6f);
         if (portal) portal.SetActive(true);
         GameStats.BossesDefeated++;

@@ -135,6 +135,7 @@ public class ToadKingBoss : BossBase
         stateTimer = jumpDuration;
         if (model) model.localScale = new Vector3(0.85f, 1.2f, 0.85f);
         Sfx.Play("boing", 0.5f);
+        Attack(0.9f);
     }
 
     void Land()

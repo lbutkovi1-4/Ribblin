@@ -47,7 +47,7 @@ public class CrabBoss : BossBase
             case S.Idle:
                 FaceTowards(PlayerPos, 6f);
                 TouchDamage(2.4f, topHeight - 0.7f);
-                if (stateTimer <= 0f) { s = S.Windup; stateTimer = 0.8f; Sfx.Play("roar", 0.3f); }
+                if (stateTimer <= 0f) { s = S.Windup; stateTimer = 0.8f; Attack(); }
                 break;
 
             case S.Windup:
