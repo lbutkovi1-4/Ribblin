@@ -1,5 +1,9 @@
 Music by Kevin MacLeod (incompetech.com)
-"Carefree", "Island Meet and Greet", "Magic Forest",
-"Folk Round", "Clear Air", "Heroic Age"
+"Carefree", "Island Meet and Greet", "Sneaky Snitch", "Folk Round",
+"Mining by Moonlight", "Volatile Reaction", "Heroic Age"
 Licensed under Creative Commons: By Attribution 4.0
 http://creativecommons.org/licenses/by/4.0/
+
+Sound effects:
+"Impact Sounds" & "Interface Sounds" by Kenney (kenney.nl) – CC0
+"80 CC0 creature SFX" by rubberduck (opengameart.org) – CC0
