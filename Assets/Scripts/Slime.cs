@@ -2,10 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // Sluzavi neprijatelj. Skoči mu na glavu ili ga pojedi jezikom. Dodir sa strane = -1 srce.
-public class Slime : MonoBehaviour
+// Bodljikava verzija (spiky) se ne može zgaziti – nju pojedi jezikom.
+public class Slime : Enemy
 {
-    public static readonly List<Slime> All = new List<Slime>();
-
     public float radius = 0.7f;
     public float height = 1.0f;
     public float speed = 2.2f;
@@ -20,7 +19,6 @@ public class Slime : MonoBehaviour
     Vector3 home;
     Vector3 target;
     float retarget;
-    bool dead;
     float deadTimer;
     Vector3 baseScale = Vector3.one;
     float seed;
@@ -28,11 +26,7 @@ public class Slime : MonoBehaviour
     float lungeTime;
     Vector3 lungeDir;
 
-    public bool Alive => !dead;
-    public Vector3 Center => transform.position + Vector3.up * height * 0.5f;
-
-    void OnEnable() { All.Add(this); }
-    void OnDisable() { All.Remove(this); }
+    public override Vector3 Center => transform.position + Vector3.up * height * 0.5f;
 
     void Start()
     {
@@ -126,37 +120,9 @@ public class Slime : MonoBehaviour
 
     void CheckPlayer(FrogController frog)
     {
-        if (frog)
-        {
-            Vector3 fp = frog.transform.position;
-            float fd = Flat(fp, transform.position);
-            float top = transform.position.y + height;
-            if (fd < radius + 0.5f && fp.y > top - 0.5f && fp.y < top + 1.0f && frog.Velocity.y < 0.5f && !frog.IsGrounded)
-            {
-                frog.Bounce(2.8f);
-                Sfx.Play("stomp", 0.6f);
-                Die();
-            }
-            else if (fd < radius + 0.4f && fp.y < top - 0.4f && fp.y > transform.position.y - 1f)
-            {
-                PlayerHealth.Instance?.Damage(1, transform.position);
-            }
-        }
+        HandleContact(radius, transform.position.y, transform.position.y + height);
     }
 
-    public void Eat()
-    {
-        Sfx.Play("gulp", 0.6f);
-        Die();
-    }
+    protected override void OnKilled() { }   // umjesto brisanja: animacija spljoštavanja u Update
 
-    void Die()
-    {
-        if (dead) return;
-        dead = true;
-        All.Remove(this);
-        Fx.Puff(Center, "Dust", 1.4f);
-    }
-
-    static float Flat(Vector3 a, Vector3 b) { a.y = 0; b.y = 0; return Vector3.Distance(a, b); }
 }
