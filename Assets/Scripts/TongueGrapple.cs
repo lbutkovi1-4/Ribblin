@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// Jezik: lijevi klik na rotkvicu = povuci se do nje. Lijevi klik na sluzavca u blizini = pojedi ga.
+// Jezik: lijevi klik na rotkvicu = povuci se do nje. Lijevi klik na neprijatelja u blizini = pojedi ga.
 [RequireComponent(typeof(FrogController))]
 public class TongueGrapple : MonoBehaviour
 {
@@ -21,7 +21,7 @@ public class TongueGrapple : MonoBehaviour
     Camera cam;
 
     GrapplePoint aimed, current;
-    Slime aimedEnemy, currentEnemy;
+    Enemy aimedEnemy, currentEnemy;
     enum State { Idle, Shooting, Pulling, Lash, Retract }
     State state = State.Idle;
     float tongueLength;
@@ -118,7 +118,7 @@ public class TongueGrapple : MonoBehaviour
     void UpdateAim()
     {
         GrapplePoint best = null;
-        Slime bestEnemy = null;
+        Enemy bestEnemy = null;
         if (state == State.Idle && cam != null)
         {
             float bestScore = float.MaxValue;
@@ -137,7 +137,7 @@ public class TongueGrapple : MonoBehaviour
             if (best == null)
             {
                 bestScore = float.MaxValue;
-                foreach (var s in Slime.All)
+                foreach (var s in Enemy.All)
                 {
                     if (!s.Alive) continue;
                     float d = Vector3.Distance(s.Center, transform.position);
@@ -182,7 +182,7 @@ public class TongueGrapple : MonoBehaviour
         Sfx.Play("tongue", 0.5f);
     }
 
-    void StartLash(Slime enemy)
+    void StartLash(Enemy enemy)
     {
         currentEnemy = enemy;
         state = State.Lash;
