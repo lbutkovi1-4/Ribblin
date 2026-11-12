@@ -58,7 +58,7 @@ public static class Ui
         Box(r, hover ? new Color(1f, 0.6f, 0.3f, 0.97f) : new Color(0.22f, 0.6f, 0.32f, 0.95f));
         Text(r, text, Label(34, TextAnchor.MiddleCenter));
         bool clicked = GUI.Button(r, GUIContent.none, GUIStyle.none);
-        if (clicked) Sfx.Play("checkpoint", 0.3f);
+        if (clicked) Sfx.Play("click", 0.5f);
         return clicked;
     }
 

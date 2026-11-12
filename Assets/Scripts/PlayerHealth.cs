@@ -22,6 +22,7 @@ public class PlayerHealth : MonoBehaviour
 
     void Start()
     {
+        invuln = 2f;   // kratka zaštita na početku levela
         renderers = System.Array.FindAll(GetComponentsInChildren<Renderer>(), r => !(r is LineRenderer));
     }
 
