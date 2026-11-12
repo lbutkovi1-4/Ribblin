@@ -473,15 +473,16 @@ public static class RibblinLevelBuilder
         var t = new Theme
         {
             id = "L3",
-            sky = new Color(0.3f, 0.15f, 0.12f), fog = new Color(0.42f, 0.2f, 0.12f), fogStart = 40f, fogEnd = 220f,
-            ambSky = new Color(0.6f, 0.38f, 0.3f), ambEq = new Color(0.45f, 0.3f, 0.25f), ambGround = new Color(0.7f, 0.3f, 0.1f),
-            sun = new Color(1f, 0.72f, 0.5f), sunIntensity = 1.25f, sunEuler = new Vector3(42, 20, 0),
+            sky = new Color(0.2f, 0.16f, 0.3f), fog = new Color(0.28f, 0.22f, 0.36f), fogStart = 60f, fogEnd = 280f,
+            ambSky = new Color(0.55f, 0.55f, 0.75f), ambEq = new Color(0.45f, 0.42f, 0.55f), ambGround = new Color(0.55f, 0.32f, 0.2f),
+            sun = new Color(1f, 0.9f, 0.8f), sunIntensity = 1.35f, sunEuler = new Vector3(45, 25, 0),
         };
-        t.colors["Top"] = new Color(0.3f, 0.26f, 0.28f);
-        t.colors["Side"] = new Color(0.18f, 0.15f, 0.16f);
-        t.colors["SideDark"] = new Color(0.12f, 0.1f, 0.1f);
-        t.colors["Rock"] = new Color(0.27f, 0.23f, 0.24f);
-        t.colors["RockLight"] = new Color(0.38f, 0.33f, 0.33f);
+        // bazalt: hladne sive boje, da se lava, voće i neprijatelji jasno vide
+        t.colors["Top"] = new Color(0.46f, 0.47f, 0.54f);
+        t.colors["Side"] = new Color(0.24f, 0.25f, 0.3f);
+        t.colors["SideDark"] = new Color(0.16f, 0.17f, 0.21f);
+        t.colors["Rock"] = new Color(0.3f, 0.31f, 0.37f);
+        t.colors["RockLight"] = new Color(0.4f, 0.41f, 0.48f);
         var scene = Kit.NewScene(t);
         Kit.SetDifficulty(3.6f, 11f, true);     // Level 3: još brži i skaču na žabicu
         Kit.WaterPlane(0f, "LavaPlane");
@@ -489,8 +490,8 @@ public static class RibblinLevelBuilder
         // S0 – start
         Kit.Ground(new Vector3(0, 3, 0), new Vector3(14, 6, 14));
         Kit.Fruit(new Vector3(4, 4, 3));
-        Kit.CrystalDeco(new Vector3(-5, 3, -5), 1.5f);
-        Kit.CrystalDeco(new Vector3(5, 3, -4), 1.2f);
+        Kit.CrystalDeco(new Vector3(-5, 3, -5), 1.5f, "CrystalGlow");
+        Kit.CrystalDeco(new Vector3(5, 3, -4), 1.2f, "CrystalGlow");
 
         // S1 – bazaltni stupovi
         float[] heights = { 3.6f, 4.3f, 5.0f, 5.7f, 6.4f, 6.5f };
@@ -541,8 +542,8 @@ public static class RibblinLevelBuilder
         Kit.Slime(new Vector3(3, 15, 88), 3f, "SlimeOrange");
         Kit.Fruit(new Vector3(5, 16, 90));
         Kit.Fruit(new Vector3(-5, 16, 90));
-        Kit.CrystalDeco(new Vector3(-5.5f, 15, 84), 1.4f);
-        Kit.CrystalDeco(new Vector3(5.5f, 15, 83), 1.1f);
+        Kit.CrystalDeco(new Vector3(-5.5f, 15, 84), 1.4f, "CrystalGlow");
+        Kit.CrystalDeco(new Vector3(5.5f, 15, 83), 1.1f, "CrystalGlow");
 
         // most s gejzirima
         Kit.Ground(new Vector3(0, 15, 100), new Vector3(3, 1.5f, 16));
@@ -574,27 +575,33 @@ public static class RibblinLevelBuilder
         for (int i = 0; i < 10; i++)
         {
             float a = i / 10f * Mathf.PI * 2f;
-            Kit.CrystalDeco(arena + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * 15f, Random.Range(1f, 1.8f));
+            Kit.CrystalDeco(arena + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * 15f, Random.Range(1f, 1.8f), "CrystalGlow");
         }
         var portal = Kit.Portal(arena + new Vector3(0, 0, 12), "Level4_Nebo", arena);
         BuildGolem(arena, portal);
 
-        // plamenovi na rubovima i u lavi
-        foreach (var fp in new[] {
-            new Vector3(-6.5f, 3, 6), new Vector3(6.5f, 3, -6), new Vector3(-5.5f, 6.5f, 44.5f), new Vector3(5.5f, 6.5f, 35.5f),
-            new Vector3(-6.5f, 6.5f, 77.5f), new Vector3(6.5f, 6.5f, 66.5f), new Vector3(6.5f, 15, 91.5f), new Vector3(-6.5f, 15, 81),
-            new Vector3(4.5f, 15, 118.5f), new Vector3(-4.5f, 15, 109.5f) })
-            Kit.Flame(fp, 1f);
-        for (int i = 0; i < 30; i++)
+        // vulkan u pozadini, bazaltni šiljci, iskre iz lave
+        Kit.Volcano(new Vector3(-70, 0, 120), 38f, 55f);
+        Kit.Volcano(new Vector3(80, 0, 40), 22f, 30f);
+        for (int i = 0; i < 26; i++)
         {
-            float x = Random.Range(10f, 40f) * (Random.value > 0.5f ? 1f : -1f);
-            Kit.Flame(new Vector3(x, 0f, Random.Range(-10f, 170f)), Random.Range(1.2f, 2.5f));
+            float x = Random.Range(14f, 45f) * (Random.value > 0.5f ? 1f : -1f);
+            Kit.BasaltSpire(new Vector3(x, -1f, Random.Range(-15f, 175f)), Random.Range(6f, 18f), Random.Range(2f, 4.5f));
         }
-        for (int i = 0; i < 12; i++)
-        {
-            float a2 = i / 12f * Mathf.PI * 2f;
-            Kit.Flame(arena + new Vector3(Mathf.Cos(a2), 0, Mathf.Sin(a2)) * 15.3f, 0.9f);
-        }
+        Kit.Embers(new Vector3(0, 0, 40), 25f, 30);
+        Kit.Embers(new Vector3(0, 0, 110), 25f, 30);
+
+        // zmajevi: veliki lete iznad levela, mali šetaju po platformama
+        Kit.FlyingDragon(new Vector3(0, 0, 60), 45f, 30f, 0.15f, "DragonGreen", 2.2f);
+        Kit.FlyingDragon(new Vector3(0, 0, 110), 38f, 38f, -0.12f, "DragonPurple", 2.6f);
+        Kit.FlyingDragon(new Vector3(-10, 0, 150), 30f, 26f, 0.18f, "DragonTeal", 1.8f);
+        Kit.FlyingDragon(new Vector3(20, 0, 20), 50f, 45f, -0.1f, "DragonGreen", 3f);
+        Kit.WalkingDragon(new Vector3(-4.5f, 3, -3), 2f, "DragonGreen");
+        Kit.WalkingDragon(new Vector3(4, 6.5f, 36.5f), 1.5f, "DragonTeal");
+        Kit.WalkingDragon(new Vector3(-5, 6.5f, 70), 1.5f, "DragonPurple");
+        Kit.WalkingDragon(new Vector3(-4, 15, 89), 2f, "DragonGreen");
+        Kit.WalkingDragon(new Vector3(3, 15, 112), 1.5f, "DragonTeal");
+        Kit.WalkingDragon(arena + new Vector3(10, 0, -6), 2f, "DragonPurple");
 
         Kit.Player(new Vector3(0, 3.1f, -4), 0.5f, "Level 3", "Volcano", "Level4_Nebo", required, false, "Level3");
         Save(scene, "Level3_Vulkan");

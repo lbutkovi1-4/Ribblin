@@ -79,12 +79,16 @@ public static class Kit
         { "Fish", new Color(1f, 0.55f, 0.2f) }, { "FishBlue", new Color(0.3f, 0.6f, 1f) },
         { "Snake", new Color(0.35f, 0.6f, 0.2f) }, { "SnakeStripe", new Color(0.85f, 0.75f, 0.25f) },
         { "Flame", new Color(1f, 0.45f, 0.08f) }, { "FlameCore", new Color(1f, 0.85f, 0.3f) },
-        { "Bird", new Color(0.95f, 0.95f, 0.98f) }, { "BirdWing", new Color(0.55f, 0.6f, 0.7f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
+        { "Bird", new Color(0.95f, 0.95f, 0.98f) },
+        { "DragonGreen", new Color(0.25f, 0.65f, 0.4f) }, { "DragonPurple", new Color(0.5f, 0.3f, 0.75f) },
+        { "DragonTeal", new Color(0.15f, 0.6f, 0.7f) }, { "DragonBelly", new Color(0.95f, 0.85f, 0.55f) },
+        { "DragonWing", new Color(0.2f, 0.25f, 0.35f) }, { "Horn", new Color(0.95f, 0.92f, 0.85f) },
+        { "Smoke", new Color(0.32f, 0.3f, 0.34f) }, { "Ember", new Color(1f, 0.6f, 0.15f) }, { "BirdWing", new Color(0.55f, 0.6f, 0.7f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
     };
 
     static readonly Dictionary<string, float> emissive = new Dictionary<string, float>
     {
-        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Flame", 2.5f }, { "FlameCore", 3f },
+        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Flame", 2.5f }, { "Ember", 4f }, { "FlameCore", 3f },
         { "CrystalGlow", 3f }, { "PortalCore", 2f }, { "Firefly", 3f }, { "Warning", 1.2f }, { "Tongue", 0.3f },
     };
 
@@ -658,6 +662,120 @@ public static class Kit
         b.speed = speed;
         b.wingL = wl;
         b.wingR = wr;
+    }
+
+    public static Transform DragonModel(Transform parent, string color, bool withLegs, out Transform wingL, out Transform wingR)
+    {
+        var m = Group("Model", parent.position, parent);
+        V(m, PrimitiveType.Sphere, "Body", new Vector3(0, 0, 0), new Vector3(1.2f, 1.0f, 2.2f), color);
+        V(m, PrimitiveType.Sphere, "Belly", new Vector3(0, -0.15f, 0.1f), new Vector3(0.9f, 0.75f, 1.8f), "DragonBelly");
+        V(m, PrimitiveType.Sphere, "Neck", new Vector3(0, 0.5f, 1.1f), new Vector3(0.55f, 0.6f, 0.9f), color, new Vector3(-35, 0, 0));
+        V(m, PrimitiveType.Sphere, "Head", new Vector3(0, 0.95f, 1.6f), new Vector3(0.75f, 0.65f, 0.9f), color);
+        V(m, PrimitiveType.Cube, "Snout", new Vector3(0, 0.85f, 2.05f), new Vector3(0.45f, 0.35f, 0.5f), color);
+        V(m, PrimitiveType.Sphere, "Eye", new Vector3(0.25f, 1.1f, 1.85f), Vector3.one * 0.18f, "Yellow");
+        V(m, PrimitiveType.Sphere, "Eye", new Vector3(-0.25f, 1.1f, 1.85f), Vector3.one * 0.18f, "Yellow");
+        V(m, PrimitiveType.Sphere, "Pupil", new Vector3(0.28f, 1.12f, 1.93f), new Vector3(0.05f, 0.12f, 0.05f), "Black");
+        V(m, PrimitiveType.Sphere, "Pupil", new Vector3(-0.28f, 1.12f, 1.93f), new Vector3(0.05f, 0.12f, 0.05f), "Black");
+        V(m, PrimitiveType.Cube, "Horn", new Vector3(0.2f, 1.35f, 1.45f), new Vector3(0.1f, 0.4f, 0.1f), "Horn", new Vector3(-30, 0, 10));
+        V(m, PrimitiveType.Cube, "Horn", new Vector3(-0.2f, 1.35f, 1.45f), new Vector3(0.1f, 0.4f, 0.1f), "Horn", new Vector3(-30, 0, -10));
+        for (int i = 0; i < 4; i++)
+        {
+            float z = -1.1f - i * 0.45f;
+            float sz = Mathf.Lerp(0.55f, 0.18f, i / 3f);
+            V(m, PrimitiveType.Sphere, "Tail", new Vector3(0, -0.05f * i, z), new Vector3(sz, sz, 0.6f), color);
+        }
+        V(m, PrimitiveType.Cube, "TailTip", new Vector3(0, -0.15f, -2.95f), new Vector3(0.35f, 0.08f, 0.35f), "DragonWing", new Vector3(0, 45, 0));
+        for (int i = 0; i < 4; i++)
+            V(m, PrimitiveType.Cube, "Spike", new Vector3(0, 0.5f - i * 0.04f, 0.6f - i * 0.5f), new Vector3(0.08f, 0.25f, 0.2f), "Horn");
+        wingL = Group("WingL", parent.position, m); wingL.localPosition = new Vector3(-0.5f, 0.35f, 0.2f);
+        wingR = Group("WingR", parent.position, m); wingR.localPosition = new Vector3(0.5f, 0.35f, 0.2f);
+        V(wingL, PrimitiveType.Cube, "Wing", new Vector3(-1.1f, 0, -0.2f), new Vector3(2.2f, 0.05f, 1.3f), "DragonWing");
+        V(wingL, PrimitiveType.Cube, "Bone", new Vector3(-1.1f, 0.03f, 0.45f), new Vector3(2.2f, 0.08f, 0.08f), color);
+        V(wingR, PrimitiveType.Cube, "Wing", new Vector3(1.1f, 0, -0.2f), new Vector3(2.2f, 0.05f, 1.3f), "DragonWing");
+        V(wingR, PrimitiveType.Cube, "Bone", new Vector3(1.1f, 0.03f, 0.45f), new Vector3(2.2f, 0.08f, 0.08f), color);
+        if (withLegs)
+            foreach (float sx in new[] { -1f, 1f })
+                foreach (float sz in new[] { -0.6f, 0.6f })
+                    V(m, PrimitiveType.Cube, "Leg", new Vector3(sx * 0.45f, -0.55f, sz), new Vector3(0.22f, 0.5f, 0.22f), color);
+        return m;
+    }
+
+    public static void FlyingDragon(Vector3 center, float radius, float height, float speed, string color, float size)
+    {
+        var g = Group("Dragon", center + new Vector3(radius, height, 0));
+        var m = DragonModel(g, color, false, out var wl, out var wr);
+        m.localScale = Vector3.one * size;
+        var b = g.gameObject.AddComponent<FlyingBird>();
+        b.center = center;
+        b.radius = radius;
+        b.height = height;
+        b.speed = speed;
+        b.wingL = wl;
+        b.wingR = wr;
+    }
+
+    public static void WalkingDragon(Vector3 pos, float radius, string color)
+    {
+        var g = Group("BabyDragon", pos);
+        var m = DragonModel(g, color, true, out var wl, out var wr);
+        m.localScale = Vector3.one * 0.45f;
+        m.localPosition = Vector3.up * 0.4f;
+        wl.localRotation = Quaternion.Euler(0, 0, 25);
+        wr.localRotation = Quaternion.Euler(0, 0, -25);
+        var c = g.gameObject.AddComponent<Critter>();
+        c.radius = radius;
+        c.speed = 1.3f;
+        c.model = m;
+    }
+
+    public static void Volcano(Vector3 pos, float baseRadius, float height)
+    {
+        var g = Group("Volcano", pos);
+        int steps = 6;
+        for (int i = 0; i < steps; i++)
+        {
+            float k = i / (float)steps;
+            float r = Mathf.Lerp(baseRadius, baseRadius * 0.3f, k);
+            float h = height / steps;
+            V(g, PrimitiveType.Cylinder, "Layer", new Vector3(0, h * i + h / 2f, 0), new Vector3(r * 2f, h / 2f, r * 2f), i % 2 == 0 ? "Side" : "SideDark");
+        }
+        V(g, PrimitiveType.Cylinder, "Crater", new Vector3(0, height + 0.1f, 0), new Vector3(baseRadius * 0.5f, 0.2f, baseRadius * 0.5f), "LavaGlow");
+        for (int i = 0; i < 4; i++)
+        {
+            float a = i * 90f + 20f;
+            V(g, PrimitiveType.Cube, "LavaFlow", Quaternion.Euler(0, a, 0) * new Vector3(0, 0, baseRadius * 0.55f) + Vector3.up * height * 0.55f,
+                new Vector3(baseRadius * 0.08f, height * 0.9f, 0.4f), "LavaGlow", new Vector3(-28, a, 0));
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            var sm = V(g, PrimitiveType.Sphere, "Smoke", new Vector3(0, height, 0), Vector3.one * 4f, "Smoke");
+            sm.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            var sp = sm.AddComponent<SmokePuff>();
+            sp.maxHeight = height * 0.8f;
+            sp.startSize = baseRadius * 0.25f;
+            sp.endSize = baseRadius * 0.7f;
+        }
+    }
+
+    public static void BasaltSpire(Vector3 pos, float height, float width)
+    {
+        var g = Group("Spire", pos);
+        V(g, PrimitiveType.Cube, "Rock", new Vector3(0, height * 0.5f, 0), new Vector3(width, height, width), "Rock", new Vector3(0, Random.Range(0, 90), 0));
+        V(g, PrimitiveType.Cube, "Rock", new Vector3(width * 0.3f, height * 0.35f, width * 0.2f), new Vector3(width * 0.7f, height * 0.7f, width * 0.7f), "RockLight", new Vector3(0, Random.Range(0, 90), 0));
+        V(g, PrimitiveType.Cube, "Tip", new Vector3(0, height, 0), new Vector3(width * 0.5f, width * 0.8f, width * 0.5f), "Rock", new Vector3(0, 45, 45));
+    }
+
+    public static void Embers(Vector3 center, float spread, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 p = center + new Vector3(Random.Range(-spread, spread), 0, Random.Range(-spread, spread));
+            var e = P(PrimitiveType.Sphere, "Ember", null, p, Vector3.one * 0.18f, "Ember", false);
+            e.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            var em = e.AddComponent<Ember>();
+            em.maxHeight = Random.Range(6f, 14f);
+            em.riseSpeed = Random.Range(0.8f, 1.8f);
+        }
     }
 
     // ---------- žabica, kamera, game manager ----------
