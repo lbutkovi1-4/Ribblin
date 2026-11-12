@@ -818,21 +818,21 @@ public static class RibblinLevelBuilder
     // =====================================================================
     static void BuildLevel4()
     {
-        // Nebesko kraljevstvo u zalazu sunca: mramor, zlato, duge i baloni – sasvim drukčije od otoka
+        // Nebesko kraljevstvo u zlatnom zalazu sunca: mramor, zlato i baloni – sasvim drukčije od otoka
         var t = new Theme
         {
             id = "L4",
-            sky = new Color(0.98f, 0.7f, 0.62f), fog = new Color(1f, 0.82f, 0.78f), fogStart = 80f, fogEnd = 360f,
-            ambSky = new Color(1f, 0.85f, 0.85f), ambEq = new Color(0.95f, 0.8f, 0.85f), ambGround = new Color(0.65f, 0.55f, 0.7f),
-            sun = new Color(1f, 0.82f, 0.65f), sunIntensity = 1.35f, sunEuler = new Vector3(28, -50, 0),
+            sky = new Color(0.98f, 0.8f, 0.52f), fog = new Color(1f, 0.9f, 0.72f), fogStart = 80f, fogEnd = 360f,
+            ambSky = new Color(1f, 0.92f, 0.8f), ambEq = new Color(0.92f, 0.86f, 0.75f), ambGround = new Color(0.6f, 0.55f, 0.5f),
+            sun = new Color(1f, 0.85f, 0.65f), sunIntensity = 1.35f, sunEuler = new Vector3(28, -50, 0),
         };
-        t.colors["Top"] = new Color(0.78f, 0.7f, 0.95f);      // lila "trava"
-        t.colors["Side"] = new Color(0.95f, 0.93f, 0.9f);     // mramor
-        t.colors["SideDark"] = new Color(0.78f, 0.74f, 0.8f);
+        // zlatni zalazak sunca: krem mramor, zlato i bijeli oblaci (bez roza i dugih boja)
+        t.colors["Top"] = new Color(0.93f, 0.88f, 0.76f);     // krem kamen
+        t.colors["Side"] = new Color(0.82f, 0.78f, 0.72f);    // mramor
+        t.colors["SideDark"] = new Color(0.62f, 0.58f, 0.54f);
         t.colors["Rock"] = new Color(0.95f, 0.93f, 0.9f);
-        t.colors["Cloud"] = new Color(1f, 0.9f, 0.92f);       // ružičasti oblaci
-        t.colors["Leaf"] = new Color(0.95f, 0.55f, 0.75f);    // ružičasto lišće
-        t.colors["LeafDark"] = new Color(0.8f, 0.4f, 0.65f);
+        t.colors["Cloud"] = new Color(1f, 1f, 1f);
+        t.colors["Balloon1"] = new Color(0.85f, 0.25f, 0.2f);
         var scene = Kit.NewScene(t);
         Kit.SetDifficulty(4.5f, 14f, true);     // Level 4: najbrži i najagresivniji
 
@@ -853,8 +853,8 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(-4, 11, -4));
         Kit.Slime(new Vector3(2, 10, 1), 3f, "SlimeBlue");
 
-        // S1 – duga s iskačućim šiljcima
-        Kit.Rainbow(new Vector3(0, 10, 8), 22f, 3f);
+        // S1 – mramorni most s iskačućim šiljcima
+        Kit.Bridge(new Vector3(0, 10, 8), 22f, 3f);
         Kit.PopSpikes(new Vector3(0, 10, 14), new Vector3(3, 0, 1.5f), 2.4f, 0f);
         Kit.PopSpikes(new Vector3(0, 10, 22), new Vector3(3, 0, 1.5f), 2.4f, 1.2f);
         Kit.Fruit(new Vector3(0, 11, 18));
@@ -932,8 +932,8 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(10, 36, 161));
         Kit.Fruit(new Vector3(-5, 25, 156));
 
-        // S9 – duga duga s vrtuljkom i njihalom
-        Kit.Rainbow(new Vector3(0, 24, 163), 30f, 3f);
+        // S9 – dugi mramorni most s vrtuljkom i njihalom
+        Kit.Bridge(new Vector3(0, 24, 163), 30f, 3f);
         Kit.SpinnerBar(new Vector3(0, 24, 171), 6f, 110f);
         Kit.Pendulum(new Vector3(0, 24, 179), 5f, 60f, 2f, 0.2f, "Marble");
         Kit.PopSpikes(new Vector3(0, 24, 186), new Vector3(3, 0, 1.5f), 2.2f, 0.4f);
@@ -947,7 +947,7 @@ public static class RibblinLevelBuilder
         Kit.Flyer(new Vector3(-3, 27, 201), "sprite");
         Kit.Fruit(new Vector3(-4, 25, 202));
 
-        int required = Kit.FruitCount;   // Level 4: SVE voće
+        int required = Kit.FruitCount - 2;   // Level 4: sve voće osim dva
         Kit.Grapple(new Vector3(0, 29f, 211), required);
         Kit.Grapple(new Vector3(0, 29.5f, 217), required);
 

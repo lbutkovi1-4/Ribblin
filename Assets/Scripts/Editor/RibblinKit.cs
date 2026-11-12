@@ -959,15 +959,13 @@ public static class Kit
 
     // ---------- nebeski ukrasi (Level 4) ----------
 
-    public static void Rainbow(Vector3 startTop, float length, float width)
+    // Mramorni most sa zlatnim rubovima (staza duž osi Z)
+    public static void Bridge(Vector3 startTop, float length, float width)
     {
         Vector3 c = startTop + new Vector3(0, 0, length / 2f);
         Ground(c, new Vector3(width, 0.6f, length), "Marble", "Marble");
-        for (int i = 0; i < 6; i++)
-        {
-            float x = -width / 2f + width / 6f * (i + 0.5f);
-            P(PrimitiveType.Cube, "Stripe", null, c + new Vector3(x, 0.01f, 0), new Vector3(width / 6f, 0.02f, length), "Rainbow" + (i + 1), false);
-        }
+        P(PrimitiveType.Cube, "Edge", null, c + new Vector3(-width / 2f, 0.08f, 0), new Vector3(0.2f, 0.16f, length), "Gold", false);
+        P(PrimitiveType.Cube, "Edge", null, c + new Vector3(width / 2f, 0.08f, 0), new Vector3(0.2f, 0.16f, length), "Gold", false);
     }
 
     public static void Balloon(Vector3 top, Vector3 offset, float period, float phase, string color)
