@@ -15,7 +15,7 @@ public class LavaRock : MonoBehaviour
         r.duration = duration;
         r.arc = Mathf.Max(4f, Vector3.Distance(from, to) * 0.35f);
         TimedStrike.Spawn(to, 1.9f, duration, "rock");
-        Sfx.Play("whoosh", 0.4f);
+        Sfx.Play("whoosh", 0.3f);
     }
 
     void Update()

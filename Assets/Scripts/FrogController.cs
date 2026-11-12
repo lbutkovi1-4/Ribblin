@@ -32,6 +32,7 @@ public class FrogController : MonoBehaviour
     public Vector3 Velocity { get => velocity; set => velocity = value; }
     public bool IsGrounded => controller != null && controller.isGrounded;
     public Transform GroundTransform { get; private set; }
+    public Vector3 Wind { get; set; }      // vjetar (npr. boss) – postavlja se svaki frame
 
     CharacterController controller;
     Vector3 velocity;
@@ -129,7 +130,8 @@ public class FrogController : MonoBehaviour
         velocity.y = Mathf.Max(velocity.y + gravity * Time.deltaTime, -maxFallSpeed);
 
         groundHit = null;
-        controller.Move(velocity * Time.deltaTime);
+        controller.Move((velocity + Wind) * Time.deltaTime);
+        Wind = Vector3.zero;
         GroundTransform = controller.isGrounded ? groundHit : null;
         wasGrounded = grounded;
 

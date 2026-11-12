@@ -1,15 +1,16 @@
 using UnityEngine;
 
-// BOSS 3 – Magmor, golem od lave.
-// Baca kamenje lave (bježi iz crvenih krugova). Kad se pregrije, kristali na njemu zasvijetle – uhvati ih jezikom.
+// BOSS 3 – Magmor the Molten, golem od lave.
+// Baca kamenje lave (bježi iz crvenih krugova) – što je slabiji, baca više kamenja odjednom.
+// Kad se pregrije, kristali na njemu nakratko zasvijetle – uhvati jedan jezikom. Ima 5 kristala.
 public class GolemBoss : BossBase
 {
     public GrapplePoint[] crystals;
     public Transform model;
     public Transform throwHand;
-    public float throwInterval = 1.6f;
-    public int throwsBeforeOverheat = 4;
-    public float overheatTime = 5.5f;
+    public float throwInterval = 1.3f;
+    public int throwsBeforeOverheat = 5;
+    public float overheatTime = 3.5f;
 
     enum S { Throwing, Overheat }
     S s = S.Throwing;
@@ -36,7 +37,7 @@ public class GolemBoss : BossBase
     protected override void OnActivate()
     {
         s = S.Throwing;
-        stateTimer = 1.5f;
+        stateTimer = 1.2f;
     }
 
     protected override void Tick()
@@ -47,22 +48,22 @@ public class GolemBoss : BossBase
         switch (s)
         {
             case S.Throwing:
-                FaceTowards(PlayerPos, 2.5f);
+                FaceTowards(PlayerPos, 3f);
                 if (touchGrace <= 0f) TouchDamage(2.6f, 6f);
                 if (model) model.localPosition = Vector3.Lerp(model.localPosition, Vector3.zero, 5f * Time.deltaTime);
                 if (stateTimer <= 0f)
                 {
                     Throw();
                     throws++;
-                    stateTimer = throwInterval * (0.6f + 0.4f * health / (float)maxHealth);
+                    stateTimer = throwInterval * (0.55f + 0.45f * health / (float)maxHealth);
                     if (throws >= throwsBeforeOverheat)
                     {
                         throws = 0;
                         s = S.Overheat;
                         stateTimer = overheatTime;
                         SetCrystals(true);
-                        Sfx.Play("roar", 0.6f);
-                        GameManager.ShowMessage("Magmor is overheating! Grab a glowing crystal with your tongue!", 3f);
+                        Sfx.Play(roarSound, 0.8f);
+                        GameManager.ShowMessage("Magmor is overheating! Grab a glowing crystal with your tongue – quick!", 2.5f);
                     }
                 }
                 break;
@@ -74,7 +75,7 @@ public class GolemBoss : BossBase
                 {
                     SetCrystals(false);
                     s = S.Throwing;
-                    stateTimer = 1.2f;
+                    stateTimer = 0.8f;
                 }
                 break;
         }
@@ -82,14 +83,15 @@ public class GolemBoss : BossBase
 
     void Throw()
     {
+        Attack(0.7f);
         Vector3 from = throwHand ? throwHand.position : transform.position + Vector3.up * 6f;
         Vector3 lead = frog ? new Vector3(frog.Velocity.x, 0, frog.Velocity.z) * 0.5f : Vector3.zero;
-        Vector3 target = ClampToArena(PlayerPos + lead, 1f);
-        LavaRock.Spawn(from, target, 1.1f);
-        if (health <= 1)
+        LavaRock.Spawn(from, ClampToArena(PlayerPos + lead, 1f), 1.0f);
+        int extra = health <= 1 ? 3 : health <= 3 ? 2 : 0;    // slabiji Magmor = više kamenja
+        for (int i = 0; i < extra; i++)
         {
-            Vector2 r = Random.insideUnitCircle * 4f;
-            LavaRock.Spawn(from, ClampToArena(PlayerPos + new Vector3(r.x, 0, r.y), 1f), 1.3f);
+            Vector2 r = Random.insideUnitCircle * 5f;
+            LavaRock.Spawn(from, ClampToArena(PlayerPos + new Vector3(r.x, 0, r.y), 1f), Random.Range(1.0f, 1.5f));
         }
     }
 
@@ -97,7 +99,7 @@ public class GolemBoss : BossBase
     {
         if (s != S.Overheat || dead) return;
         c.gameObject.SetActive(false);
-        Fx.Puff(c.transform.position, "CrystalGlow", 2.5f);
+        Fx.Burst(c.transform.position, "CrystalGlow", 14, 1.2f);
         Hit();
         if (frog)
         {
@@ -109,7 +111,7 @@ public class GolemBoss : BossBase
         SetCrystals(false);
         touchGrace = 1.2f;
         s = S.Throwing;
-        stateTimer = 1.5f;
+        stateTimer = 1.2f;
     }
 
     void SetCrystals(bool on)
