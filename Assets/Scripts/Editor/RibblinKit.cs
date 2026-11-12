@@ -83,17 +83,29 @@ public static class Kit
         { "DragonGreen", new Color(0.25f, 0.65f, 0.4f) }, { "DragonPurple", new Color(0.5f, 0.3f, 0.75f) },
         { "DragonTeal", new Color(0.15f, 0.6f, 0.7f) }, { "DragonBelly", new Color(0.95f, 0.85f, 0.55f) },
         { "DragonWing", new Color(0.2f, 0.25f, 0.35f) }, { "Horn", new Color(0.95f, 0.92f, 0.85f) },
-        { "Smoke", new Color(0.32f, 0.3f, 0.34f) }, { "Ember", new Color(1f, 0.6f, 0.15f) }, { "BirdWing", new Color(0.55f, 0.6f, 0.7f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
+        { "Smoke", new Color(0.32f, 0.3f, 0.34f) },
+        { "Feather", new Color(0.85f, 0.92f, 1f) }, { "BeeYellow", new Color(1f, 0.82f, 0.15f) },
+        { "Wing", new Color(0.92f, 0.96f, 1f) }, { "Mosquito", new Color(0.45f, 0.35f, 0.3f) },
+        { "Bat", new Color(0.32f, 0.2f, 0.42f) }, { "Sprite", new Color(0.4f, 0.85f, 1f) },
+        { "PlantStem", new Color(0.3f, 0.6f, 0.25f) }, { "PlantHead", new Color(0.95f, 0.35f, 0.55f) },
+        { "PlantPurple", new Color(0.6f, 0.3f, 0.7f) }, { "Basalt", new Color(0.2f, 0.2f, 0.25f) },
+        { "Marble", new Color(0.95f, 0.93f, 0.9f) }, { "Balloon1", new Color(1f, 0.4f, 0.45f) },
+        { "Balloon2", new Color(0.4f, 0.75f, 1f) }, { "Balloon3", new Color(1f, 0.8f, 0.3f) },
+        { "Rainbow1", new Color(1f, 0.35f, 0.35f) }, { "Rainbow2", new Color(1f, 0.65f, 0.25f) },
+        { "Rainbow3", new Color(1f, 0.9f, 0.3f) }, { "Rainbow4", new Color(0.4f, 0.85f, 0.4f) },
+        { "Rainbow5", new Color(0.35f, 0.6f, 1f) }, { "Rainbow6", new Color(0.65f, 0.4f, 0.95f) }, { "Ember", new Color(1f, 0.6f, 0.15f) }, { "BirdWing", new Color(0.55f, 0.6f, 0.7f) }, { "Firefly", new Color(1f, 0.95f, 0.4f) },
     };
 
     static readonly Dictionary<string, float> emissive = new Dictionary<string, float>
     {
-        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Flame", 2.5f }, { "Ember", 4f }, { "FlameCore", 3f },
+        { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Sprite", 2f }, { "Flame", 2.5f }, { "Ember", 4f }, { "FlameCore", 3f },
         { "CrystalGlow", 3f }, { "PortalCore", 2f }, { "Firefly", 3f }, { "Warning", 1.2f }, { "Tongue", 0.3f },
     };
 
     public static readonly string[] FxKeys =
-        { "Tongue", "Dust", "Warning", "WarningDark", "Lightning", "Lava", "Shock", "CrystalGlow", "CrystalDim", "PortalCore", "FlagOn" };
+        { "Tongue", "Dust", "Warning", "WarningDark", "Lightning", "Lava", "Shock", "CrystalGlow", "CrystalDim", "PortalCore", "FlagOn",
+          "Feather", "Gold", "Sprite", "LeafDark", "SlimePurple", "SlimeOrange", "SlimeBlue", "SlimeGreen", "Basalt",
+          "PlantHead", "PlantPurple", "BeeYellow", "Mosquito", "Bat", "Cloud" };
 
     // ---------- scena ----------
 
@@ -424,7 +436,7 @@ public static class Kit
         if (bossGateSpawn) Group("BossGateSpawn", pos + Vector3.up * 0.5f);
     }
 
-    public static void Slime(Vector3 pos, float wander, string color = "SlimeGreen", float size = 1f, bool chase = true)
+    public static void Slime(Vector3 pos, float wander, string color = "SlimeGreen", float size = 1f, bool chase = true, bool spiky = false)
     {
         var g = Group("Slime", pos);
         var model = Group("Model", pos, g);
@@ -439,6 +451,18 @@ public static class Kit
         s.radius = 0.7f * size;
         s.height = 1.0f * size;
         s.chase = chase;
+        s.debrisMat = color;
+        s.spiky = spiky;
+        if (spiky)
+        {
+            g.name = "SpikySlime";
+            for (int i = 0; i < 7; i++)
+            {
+                float a = i / 7f * Mathf.PI * 2f;
+                V(model, PrimitiveType.Cube, "Spike", new Vector3(Mathf.Cos(a) * 0.45f, 0.85f, Mathf.Sin(a) * 0.45f) * size, new Vector3(0.14f, 0.45f, 0.14f) * size, "Spike", new Vector3(Mathf.Sin(a) * 35f, 45, -Mathf.Cos(a) * 35f));
+            }
+            V(model, PrimitiveType.Cube, "Spike", new Vector3(0, 1.1f, 0) * size, new Vector3(0.14f, 0.5f, 0.14f) * size, "Spike", new Vector3(0, 45, 0));
+        }
         s.speed = SlimeSpeed;
         s.chaseRange = SlimeChase;
         s.lunge = SlimeLunge;
@@ -776,6 +800,216 @@ public static class Kit
             em.maxHeight = Random.Range(6f, 14f);
             em.riseSpeed = Random.Range(0.8f, 1.8f);
         }
+    }
+
+    // ---------- nove vrste neprijatelja ----------
+
+    // kind: "bee" (L1), "mosquito" (L2), "bat" (L3), "sprite" (L4)
+    public static void Flyer(Vector3 pos, string kind)
+    {
+        var g = Group("Flyer_" + kind, pos);
+        var model = Group("Model", pos, g);
+        string body = kind == "bee" ? "BeeYellow" : kind == "mosquito" ? "Mosquito" : kind == "bat" ? "Bat" : "Sprite";
+        string wingMat = kind == "bat" ? "Bat" : "Wing";
+        V(model, PrimitiveType.Sphere, "Body", Vector3.zero, kind == "mosquito" ? new Vector3(0.35f, 0.35f, 0.9f) : new Vector3(0.7f, 0.65f, 0.85f), body);
+        if (kind == "bee")
+        {
+            V(model, PrimitiveType.Cylinder, "Stripe", new Vector3(0, 0, -0.1f), new Vector3(0.72f, 0.04f, 0.72f), "Black", new Vector3(90, 0, 0));
+            V(model, PrimitiveType.Cylinder, "Stripe", new Vector3(0, 0, 0.15f), new Vector3(0.7f, 0.04f, 0.7f), "Black", new Vector3(90, 0, 0));
+            V(model, PrimitiveType.Cube, "Stinger", new Vector3(0, 0, -0.5f), new Vector3(0.08f, 0.08f, 0.3f), "Black");
+        }
+        if (kind == "mosquito")
+        {
+            V(model, PrimitiveType.Cube, "Needle", new Vector3(0, -0.05f, 0.65f), new Vector3(0.04f, 0.04f, 0.5f), "Black");
+            for (int i = 0; i < 3; i++)
+                foreach (float sx in new[] { -1f, 1f })
+                    V(model, PrimitiveType.Cube, "Leg", new Vector3(sx * 0.25f, -0.3f, -0.2f + i * 0.2f), new Vector3(0.03f, 0.5f, 0.03f), "Black", new Vector3(0, 0, sx * 25));
+        }
+        if (kind == "bat")
+        {
+            V(model, PrimitiveType.Cube, "Ear", new Vector3(0.18f, 0.4f, 0.1f), new Vector3(0.12f, 0.25f, 0.06f), "Bat", new Vector3(0, 0, -15));
+            V(model, PrimitiveType.Cube, "Ear", new Vector3(-0.18f, 0.4f, 0.1f), new Vector3(0.12f, 0.25f, 0.06f), "Bat", new Vector3(0, 0, 15));
+        }
+        if (kind == "sprite")
+            V(model, PrimitiveType.Sphere, "Core", new Vector3(0, 0, 0.1f), Vector3.one * 0.45f, "White");
+        string eye = kind == "bat" ? "LavaGlow" : "White";
+        V(model, PrimitiveType.Sphere, "Eye", new Vector3(0.15f, 0.12f, 0.35f), Vector3.one * 0.16f, eye);
+        V(model, PrimitiveType.Sphere, "Eye", new Vector3(-0.15f, 0.12f, 0.35f), Vector3.one * 0.16f, eye);
+        V(model, PrimitiveType.Sphere, "Pupil", new Vector3(0.15f, 0.12f, 0.42f), Vector3.one * 0.07f, "Black");
+        V(model, PrimitiveType.Sphere, "Pupil", new Vector3(-0.15f, 0.12f, 0.42f), Vector3.one * 0.07f, "Black");
+        var wl = Group("WingL", pos, model); wl.localPosition = new Vector3(-0.25f, 0.25f, 0);
+        var wr = Group("WingR", pos, model); wr.localPosition = new Vector3(0.25f, 0.25f, 0);
+        Vector3 ws = kind == "bat" ? new Vector3(0.9f, 0.04f, 0.55f) : new Vector3(0.6f, 0.03f, 0.35f);
+        V(wl, PrimitiveType.Cube, "Wing", new Vector3(-ws.x / 2f, 0, 0), ws, wingMat);
+        V(wr, PrimitiveType.Cube, "Wing", new Vector3(ws.x / 2f, 0, 0), ws, wingMat);
+        var f = g.gameObject.AddComponent<FlyerEnemy>();
+        f.model = model;
+        f.wingL = wl;
+        f.wingR = wr;
+        f.debrisMat = body;
+        f.diveSpeed = 11f + SlimeSpeed;          // brži u kasnijim levelima
+        f.range = SlimeChase + 3f;
+    }
+
+    // kind: "plant" (L1), "swamp" (L2), "lava" (L3), "cloud" (L4)
+    public static void Spitter(Vector3 pos, string kind)
+    {
+        var g = Group("Spitter_" + kind, pos);
+        Transform head;
+        string proj;
+        if (kind == "lava")
+        {
+            V(g, PrimitiveType.Cylinder, "Base", new Vector3(0, 0.6f, 0), new Vector3(1.4f, 0.6f, 1.4f), "Basalt");
+            head = Group("Head", pos, g); head.localPosition = new Vector3(0, 1.4f, 0);
+            V(head, PrimitiveType.Sphere, "Dome", Vector3.zero, new Vector3(1.1f, 0.9f, 1.1f), "Basalt");
+            V(head, PrimitiveType.Cylinder, "Barrel", new Vector3(0, 0, 0.55f), new Vector3(0.45f, 0.3f, 0.45f), "Basalt", new Vector3(90, 0, 0));
+            V(head, PrimitiveType.Sphere, "Glow", new Vector3(0, 0, 0.85f), Vector3.one * 0.32f, "LavaGlow");
+            proj = "Lava";
+        }
+        else if (kind == "cloud")
+        {
+            head = Group("Head", pos, g); head.localPosition = new Vector3(0, 1.2f, 0);
+            V(head, PrimitiveType.Sphere, "Puff", Vector3.zero, new Vector3(1.4f, 1f, 1.2f), "Cloud");
+            V(head, PrimitiveType.Sphere, "Puff", new Vector3(0.55f, -0.1f, 0), Vector3.one * 0.8f, "Cloud");
+            V(head, PrimitiveType.Sphere, "Puff", new Vector3(-0.55f, -0.1f, 0), Vector3.one * 0.8f, "Cloud");
+            V(head, PrimitiveType.Sphere, "Eye", new Vector3(0, 0.1f, 0.55f), Vector3.one * 0.35f, "Sprite");
+            V(head, PrimitiveType.Sphere, "Pupil", new Vector3(0, 0.1f, 0.7f), Vector3.one * 0.15f, "Black");
+            V(g, PrimitiveType.Cylinder, "Stand", new Vector3(0, 0.35f, 0), new Vector3(0.6f, 0.35f, 0.6f), "Gold");
+            proj = "Sprite";
+        }
+        else
+        {
+            string headMat = kind == "swamp" ? "PlantPurple" : "PlantHead";
+            V(g, PrimitiveType.Cylinder, "Stem", new Vector3(0, 0.6f, 0), new Vector3(0.25f, 0.6f, 0.25f), "PlantStem");
+            V(g, PrimitiveType.Sphere, "Leaf", new Vector3(0.45f, 0.15f, 0), new Vector3(0.8f, 0.12f, 0.35f), "Leaf", new Vector3(0, 0, -15));
+            V(g, PrimitiveType.Sphere, "Leaf", new Vector3(-0.45f, 0.15f, 0), new Vector3(0.8f, 0.12f, 0.35f), "Leaf", new Vector3(0, 0, 15));
+            head = Group("Head", pos, g); head.localPosition = new Vector3(0, 1.4f, 0);
+            V(head, PrimitiveType.Sphere, "Bulb", Vector3.zero, new Vector3(0.95f, 0.85f, 0.95f), headMat);
+            V(head, PrimitiveType.Sphere, "Mouth", new Vector3(0, 0, 0.42f), new Vector3(0.45f, 0.35f, 0.2f), "Black");
+            for (int i = 0; i < 5; i++)
+            {
+                float a = i / 5f * Mathf.PI * 2f;
+                V(head, PrimitiveType.Sphere, "Petal", new Vector3(Mathf.Cos(a) * 0.55f, Mathf.Sin(a) * 0.55f, -0.15f), new Vector3(0.45f, 0.45f, 0.12f), kind == "swamp" ? "LeafDark" : "Yellow");
+            }
+            proj = kind == "swamp" ? "SlimePurple" : "LeafDark";
+        }
+        var sp = g.gameObject.AddComponent<SpitterEnemy>();
+        sp.head = head;
+        sp.projectileMat = proj;
+        sp.debrisMat = kind == "lava" ? "Basalt" : kind == "cloud" ? "Cloud" : kind == "swamp" ? "PlantPurple" : "PlantHead";
+        sp.interval = Mathf.Lerp(2.6f, 1.6f, Mathf.InverseLerp(2f, 4.5f, SlimeSpeed));
+        sp.projectileSpeed = 7f + SlimeSpeed;
+    }
+
+    // ---------- zamke ----------
+
+    public static void FallingPlat(Vector3 top, Vector3 size, string topMat = "Top", string sideMat = "Side")
+    {
+        var g = Group("FallingPlatform", top);
+        Ground(top, size, topMat, sideMat, g);
+        V(g, PrimitiveType.Cube, "Crack", new Vector3(0, 0.01f, 0), new Vector3(size.x * 0.7f, 0.02f, 0.08f), "Black", new Vector3(0, 35, 0));
+        g.gameObject.AddComponent<FallingPlatform>();
+    }
+
+    public static void PopSpikes(Vector3 center, Vector3 size, float period, float offset)
+    {
+        var g = Group("PopSpikes", center);
+        V(g, PrimitiveType.Cube, "Plate", new Vector3(0, 0.02f, 0), new Vector3(size.x, 0.05f, size.z), "GolemDark");
+        var spikes = Group("Spikes", center, g);
+        int nx = Mathf.Max(1, Mathf.RoundToInt(size.x / 0.7f)), nz = Mathf.Max(1, Mathf.RoundToInt(size.z / 0.7f));
+        for (int x = 0; x < nx; x++)
+            for (int z = 0; z < nz; z++)
+            {
+                Vector3 lp = new Vector3((x - (nx - 1) / 2f) * 0.7f, 0.35f, (z - (nz - 1) / 2f) * 0.7f);
+                V(spikes, PrimitiveType.Cube, "Spike", lp, new Vector3(0.18f, 0.7f, 0.18f), "Spike", new Vector3(0, 45, 0));
+            }
+        spikes.localPosition = new Vector3(0, -0.75f, 0);
+        var zone = Group("Zone", center + Vector3.up * 0.45f, g);
+        zone.localScale = new Vector3(size.x, 0.9f, size.z);
+        var dz = zone.gameObject.AddComponent<DamageZone>();
+        dz.margin = 0.2f;
+        dz.zoneActive = false;
+        var ps = g.gameObject.AddComponent<PopSpikes>();
+        ps.spikes = spikes;
+        ps.zone = dz;
+        ps.period = period;
+        ps.offset = offset;
+    }
+
+    // Njihalo preko staze koja ide duž osi Z (njiše se lijevo-desno).
+    public static void Pendulum(Vector3 ground, float height, float swing, float period, float offset, string mat, float rotY = 0f)
+    {
+        var root = Group("PendulumFrame", ground);
+        root.rotation = Quaternion.Euler(0, rotY, 0);
+        float half = height * 0.95f + 1f;
+        V(root, PrimitiveType.Cube, "Post", new Vector3(-half, height / 2f, 0), new Vector3(0.4f, height, 0.4f), mat);
+        V(root, PrimitiveType.Cube, "Post", new Vector3(half, height / 2f, 0), new Vector3(0.4f, height, 0.4f), mat);
+        V(root, PrimitiveType.Cube, "Beam", new Vector3(0, height, 0), new Vector3(half * 2f + 0.4f, 0.4f, 0.4f), mat);
+        var pivot = Group("Pivot", ground, root);
+        pivot.localPosition = new Vector3(0, height, 0);
+        float len = height - 1.1f;
+        V(pivot, PrimitiveType.Cube, "Arm", new Vector3(0, -len / 2f, 0), new Vector3(0.15f, len, 0.15f), "GolemDark");
+        var hammer = V(pivot, PrimitiveType.Cube, "Hammer", new Vector3(0, -len, 0), new Vector3(1.3f, 1.1f, 1.6f), mat == "TrunkDark" ? "Trunk" : "Red");
+        hammer.AddComponent<DamageZone>().margin = 0.25f;
+        var p = pivot.gameObject.AddComponent<Pendulum>();
+        p.angle = swing;
+        p.period = period;
+        p.offset = offset;
+    }
+
+    // ---------- nebeski ukrasi (Level 4) ----------
+
+    public static void Rainbow(Vector3 startTop, float length, float width)
+    {
+        Vector3 c = startTop + new Vector3(0, 0, length / 2f);
+        Ground(c, new Vector3(width, 0.6f, length), "Marble", "Marble");
+        for (int i = 0; i < 6; i++)
+        {
+            float x = -width / 2f + width / 6f * (i + 0.5f);
+            P(PrimitiveType.Cube, "Stripe", null, c + new Vector3(x, 0.01f, 0), new Vector3(width / 6f, 0.02f, length), "Rainbow" + (i + 1), false);
+        }
+    }
+
+    public static void Balloon(Vector3 top, Vector3 offset, float period, float phase, string color)
+    {
+        var g = Group("Balloon", top);
+        Ground(top, new Vector3(2.6f, 1f, 2.6f), "Trunk", "TrunkDark", g);
+        V(g, PrimitiveType.Sphere, "Balloon", new Vector3(0, 5.5f, 0), new Vector3(4.2f, 4.8f, 4.2f), color);
+        foreach (var o in new[] { new Vector3(-1.1f, 0, -1.1f), new Vector3(1.1f, 0, -1.1f), new Vector3(-1.1f, 0, 1.1f), new Vector3(1.1f, 0, 1.1f) })
+            V(g, PrimitiveType.Cylinder, "Rope", o + new Vector3(0, 1.8f, 0), new Vector3(0.05f, 1.8f, 0.05f), "TrunkDark");
+        var mp = g.gameObject.AddComponent<MovingPlatform>();
+        mp.offset = offset;
+        mp.period = period;
+        mp.phase = phase;
+    }
+
+    public static void MarbleColumn(Vector3 pos, float height)
+    {
+        P(PrimitiveType.Cylinder, "Column", null, pos + Vector3.up * height / 2f, new Vector3(0.9f, height / 2f, 0.9f), "Marble");
+        P(PrimitiveType.Cube, "Cap", null, pos + Vector3.up * (height + 0.15f), new Vector3(1.3f, 0.3f, 1.3f), "Gold", false);
+    }
+
+    public static void Temple(Vector3 pos, float radius)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            float a = i / 6f * Mathf.PI * 2f;
+            MarbleColumn(pos + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius, 4f);
+        }
+        P(PrimitiveType.Cylinder, "Roof", null, pos + Vector3.up * 4.5f, new Vector3(radius * 2.4f, 0.25f, radius * 2.4f), "Marble", false);
+        P(PrimitiveType.Sphere, "Dome", null, pos + Vector3.up * 4.7f, new Vector3(radius * 1.8f, radius * 1.2f, radius * 1.8f), "Gold", false);
+    }
+
+    public static void Windmill(Vector3 pos)
+    {
+        P(PrimitiveType.Cylinder, "Tower", null, pos + Vector3.up * 3f, new Vector3(1.4f, 3f, 1.4f), "Marble");
+        P(PrimitiveType.Sphere, "Top", null, pos + Vector3.up * 6.2f, new Vector3(1.6f, 0.9f, 1.6f), "Balloon1", false);
+        var hub = Group("Blades", pos + new Vector3(0, 5.6f, 0.8f));
+        var sp = hub.gameObject.AddComponent<Spinner>();
+        sp.axis = Vector3.forward;
+        sp.speed = 70f;
+        for (int i = 0; i < 4; i++)
+            V(hub, PrimitiveType.Cube, "Blade", Quaternion.Euler(0, 0, i * 90) * new Vector3(0, 1.4f, 0), new Vector3(0.5f, 2.8f, 0.08f), "White", new Vector3(0, 0, i * 90));
     }
 
     // ---------- žabica, kamera, game manager ----------

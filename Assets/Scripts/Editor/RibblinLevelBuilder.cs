@@ -71,7 +71,7 @@ public static class RibblinLevelBuilder
     {
         var t = new Theme { id = "L1" };
         var scene = Kit.NewScene(t);
-        Kit.SetDifficulty(2.2f, 7f, false);     // Level 1: spori, kratko te prate
+        Kit.SetDifficulty(3.0f, 9f, false);     // Level 1
         Kit.WaterPlane(-0.3f);
 
         // glavni otok
@@ -109,6 +109,21 @@ public static class RibblinLevelBuilder
         Kit.Spikes(new Vector3(8, 0.6f, 5), 4f, true);
         Kit.Spikes(new Vector3(-20, 0.6f, -2), 5f, false);
 
+        // nove vrste neprijatelja: pčele i biljke koje pljuju
+        Kit.Flyer(new Vector3(-16, 3f, -6), "bee");
+        Kit.Flyer(new Vector3(12, 3.5f, 8), "bee");
+        Kit.Flyer(new Vector3(-12, 10.5f, 10), "bee");
+        Kit.Flyer(new Vector3(0, 3f, 45), "bee");
+        Kit.Spitter(new Vector3(-18, 0.6f, 6), "plant");
+        Kit.Spitter(new Vector3(20, 0.6f, -4), "plant");
+        Kit.Spitter(new Vector3(-9, 7.75f, 12), "plant");
+        Kit.Slime(new Vector3(-8, 0.6f, 20), 4f, "SlimeOrange", 1f, true, true);
+
+        // zamke: šiljci koji iskaču i njihalo
+        Kit.PopSpikes(new Vector3(0, 0.6f, -4), new Vector3(4, 0, 2), 3f, 0f);
+        Kit.PopSpikes(new Vector3(-4, 0.6f, 1), new Vector3(3, 0, 2), 3f, 1.5f);
+        Kit.Pendulum(new Vector3(26, 0.3f, 0), 5f, 60f, 2.6f, 0f, "TrunkDark", 90f);
+
         // koliba
         Hut(new Vector3(19, 0.6f, -19));
 
@@ -129,9 +144,9 @@ public static class RibblinLevelBuilder
 
         // južni put – kamenje u moru
         Kit.Ground(new Vector3(0, 0.8f, -34), new Vector3(3, 2, 3), "Rock", "Rock");
-        Kit.Ground(new Vector3(3, 1.4f, -38.5f), new Vector3(2.6f, 2.5f, 2.6f), "RockLight", "RockLight");
-        Kit.Ground(new Vector3(-0.5f, 2.0f, -43), new Vector3(2.6f, 3f, 2.6f), "Rock", "Rock");
-        Kit.Ground(new Vector3(2.5f, 2.6f, -47.5f), new Vector3(2.4f, 3.5f, 2.4f), "RockLight", "RockLight");
+        Kit.FallingPlat(new Vector3(3, 1.4f, -38.5f), new Vector3(2.6f, 1f, 2.6f), "RockLight", "RockLight");
+        Kit.FallingPlat(new Vector3(-0.5f, 2.0f, -43), new Vector3(2.6f, 1f, 2.6f), "Rock", "Rock");
+        Kit.FallingPlat(new Vector3(2.5f, 2.6f, -47.5f), new Vector3(2.4f, 1f, 2.4f), "RockLight", "RockLight");
         Kit.RoundGround(new Vector3(0, 0.6f, -56), 5f, 3f, "Sand", "SandDark");
         Kit.Palm(new Vector3(2, 0.6f, -57), 50);
 
@@ -265,6 +280,7 @@ public static class RibblinLevelBuilder
         stars.gameObject.SetActive(false);
 
         var boss = root.gameObject.AddComponent<CrabBoss>();
+        boss.roarSound = "crab_roar"; boss.attackSound = "crab_attack"; boss.hurtSound = "crab_hurt";
         boss.bossName = "Captain Pinchbeard";
         boss.maxHealth = 3;
         boss.arenaCenter = pos;
@@ -297,7 +313,7 @@ public static class RibblinLevelBuilder
         t.colors["TrunkDark"] = new Color(0.27f, 0.21f, 0.16f);
         t.colors["Rock"] = new Color(0.42f, 0.44f, 0.4f);
         var scene = Kit.NewScene(t);
-        Kit.SetDifficulty(2.9f, 9f, false);     // Level 2: brži, dalje vide
+        Kit.SetDifficulty(3.4f, 10f, false);    // Level 2
         Kit.WaterPlane(0f);
 
         // S0 – početni otok
@@ -319,6 +335,9 @@ public static class RibblinLevelBuilder
         // S2 – otok s gljivom-trampolinom
         Kit.RoundGround(new Vector3(0, 1, 36), 7f, 4f);
         Kit.Slime(new Vector3(-3, 1, 36), 3f, "SlimePurple");
+        Kit.Flyer(new Vector3(0, 3.5f, 52), "mosquito");
+        Kit.Spitter(new Vector3(-5, 1, 71), "swamp");
+        Kit.Flyer(new Vector3(-3, 4f, 100), "mosquito");
         Kit.Slime(new Vector3(3, 1, 34), 3f, "SlimePurple");
         Kit.BouncePad(new Vector3(4, 1, 38), 9f);
         Kit.P(PrimitiveType.Cylinder, "TreeTrunk", null, new Vector3(6.5f, 4.5f, 41.5f), new Vector3(1.2f, 3.5f, 1.2f), "TrunkDark");
@@ -375,14 +394,87 @@ public static class RibblinLevelBuilder
         Kit.MushroomDeco(new Vector3(6, 1, 96), 1.2f);
         Kit.MushroomDeco(new Vector3(-6, 1, 98), 0.9f);
 
-        int required = 13;   // Level 2: 13 od 17
-        // put do bossa
-        Kit.Checkpoint(new Vector3(3, 1, 106), true);
-        Kit.Grapple(new Vector3(0, 6.5f, 114), required);
-        Kit.Grapple(new Vector3(0, 7f, 120), required);
+        // S7 – balvani koji se ruše
+        Kit.FallingPlat(new Vector3(2, 0.6f, 112), new Vector3(2.2f, 1f, 2.8f), "Trunk", "TrunkDark");
+        Kit.FallingPlat(new Vector3(-1.5f, 0.6f, 116.5f), new Vector3(2.2f, 1f, 2.8f), "Trunk", "TrunkDark");
+        Kit.FallingPlat(new Vector3(2, 0.6f, 121), new Vector3(2.2f, 1f, 2.8f), "Trunk", "TrunkDark");
+        Kit.FallingPlat(new Vector3(-1, 0.6f, 125.5f), new Vector3(2.2f, 1f, 2.8f), "Trunk", "TrunkDark");
+        Kit.Fruit(new Vector3(-1.5f, 1.8f, 116.5f));
+        Kit.Fruit(new Vector3(-1, 1.8f, 125.5f));
+
+        // S8 – otok s biljkama i komarcima
+        Kit.RoundGround(new Vector3(0, 1, 136), 8f, 4f);
+        Kit.Checkpoint(new Vector3(-3, 1, 130.5f));
+        Kit.Spitter(new Vector3(-5, 1, 139), "swamp");
+        Kit.Spitter(new Vector3(5, 1, 141), "swamp");
+        Kit.Flyer(new Vector3(-2, 3.5f, 137), "mosquito");
+        Kit.Flyer(new Vector3(4, 3.5f, 133), "mosquito");
+        Kit.Pendulum(new Vector3(0, 1, 136), 5f, 60f, 2.4f, 0f, "TrunkDark");
+        Kit.PopSpikes(new Vector3(0, 1, 141), new Vector3(4, 0, 2), 2.8f, 0.7f);
+        Kit.Fruit(new Vector3(-6, 2, 134));
+        Kit.Fruit(new Vector3(6, 2, 136));
+        Kit.Fruit(new Vector3(0, 2, 143));
+        Kit.DeadTree(new Vector3(6, 1, 131), 6f);
+
+        // S9 – lopoči i jezik
+        Kit.Lily(new Vector3(3, 0.25f, 147.5f), 1.7f);
+        Kit.LilyMover(new Vector3(-4, 0.25f, 153), 1.8f, new Vector3(8, 0, 0), 4f, 0.25f);
+        Kit.Lily(new Vector3(-2, 0.25f, 158.5f), 1.7f);
+        Kit.Grapple(new Vector3(1, 6f, 163));
+        Kit.Grapple(new Vector3(2, 6.5f, 168));
+        Kit.Fruit(new Vector3(3, 1.5f, 147.5f));
+        Kit.Fruit(new Vector3(-2, 1.5f, 158.5f));
+
+        // S10 – veliki otok s kućicom na stablu
+        Kit.RoundGround(new Vector3(5, 1, 180), 10f, 4f);
+        Kit.Checkpoint(new Vector3(2, 1, 172.5f));
+        Kit.Slime(new Vector3(0, 1, 180), 4f, "SlimePurple", 1f, true, true);
+        Kit.Slime(new Vector3(9, 1, 183), 3.5f, "SlimePurple", 1f, true, true);
+        Kit.Slime(new Vector3(4, 1, 176), 4f, "SlimePurple");
+        Kit.Slime(new Vector3(10, 1, 177), 3f, "SlimePurple");
+        Kit.Flyer(new Vector3(6, 4f, 184), "mosquito");
+        Kit.Flyer(new Vector3(0, 4f, 186), "mosquito");
+        Kit.PopSpikes(new Vector3(5, 1, 181), new Vector3(6, 0, 1.5f), 2.6f, 0f);
+        Kit.PopSpikes(new Vector3(5, 1, 184.5f), new Vector3(6, 0, 1.5f), 2.6f, 1.3f);
+        Kit.BouncePad(new Vector3(11, 1, 179), 9f);
+        Kit.P(PrimitiveType.Cylinder, "TreeTrunk", null, new Vector3(13, 4.5f, 185), new Vector3(1.4f, 3.5f, 1.4f), "TrunkDark");
+        Kit.Ground(new Vector3(12, 8f, 185), new Vector3(5, 0.6f, 4.5f), "Trunk", "TrunkDark");
+        Kit.Fruit(new Vector3(11, 9f, 184));
+        Kit.Fruit(new Vector3(13.5f, 9f, 186));
+        Kit.Fruit(new Vector3(-3, 2, 183));
+        Kit.Fruit(new Vector3(8, 2, 188));
+        Kit.Fruit(new Vector3(1, 2, 175));
+        Kit.Fruit(new Vector3(10, 2, 173));
+        Kit.DeadTree(new Vector3(-2, 1, 186), 8f);
+        Kit.MushroomDeco(new Vector3(9, 1, 172), 1f);
+        // bonus otočić na zapadu
+        Kit.Grapple(new Vector3(-9, 6f, 178));
+        Kit.RoundGround(new Vector3(-16, 1, 178), 4f, 4f);
+        Kit.Fruit(new Vector3(-16, 2, 177));
+        Kit.Fruit(new Vector3(-17, 2, 179.5f));
+        Kit.Grapple(new Vector3(-10, 6.5f, 180));
+
+        // S11 – dugi balvan s njihalima
+        Kit.Log(new Vector3(5, 0.8f, 200), new Vector3(2.4f, 1.2f, 20));
+        Kit.Pendulum(new Vector3(5, 0.8f, 195), 5f, 60f, 2.2f, 0f, "TrunkDark");
+        Kit.Pendulum(new Vector3(5, 0.8f, 200), 5f, 60f, 2.2f, 0.33f, "TrunkDark");
+        Kit.Pendulum(new Vector3(5, 0.8f, 205), 5f, 60f, 2.2f, 0.66f, "TrunkDark");
+        Kit.Fruit(new Vector3(5, 2.2f, 197.5f));
+        Kit.Fruit(new Vector3(5, 2.2f, 202.5f));
+
+        // S12 – ispred bossa
+        Kit.RoundGround(new Vector3(5, 1, 220), 7f, 4f);
+        Kit.Checkpoint(new Vector3(2, 1, 215), true);
+        Kit.Spitter(new Vector3(9, 1, 222), "swamp");
+        Kit.Fruit(new Vector3(1, 2, 223));
+        Kit.DeadTree(new Vector3(9, 1, 217), 6f);
+
+        int required = Mathf.RoundToInt(Kit.FruitCount * 0.8f);   // Level 2: 80 % voća
+        Kit.Grapple(new Vector3(5, 6.5f, 232), required);
+        Kit.Grapple(new Vector3(5, 7f, 238), required);
 
         // arena
-        Vector3 arena = new Vector3(0, 1, 137);
+        Vector3 arena = new Vector3(5, 1, 255);
         Kit.RoundGround(arena, 15f, 4f);
         Kit.Checkpoint(arena + new Vector3(-3, 0, -12));
         for (int i = 0; i < 8; i++)
@@ -395,14 +487,14 @@ public static class RibblinLevelBuilder
         BuildToad(arena + new Vector3(0, 0, 4), arena, portal);
 
         // zmije uz rubove otoka
-        foreach (var sp in new[] { new Vector3(-5, 1, -4), new Vector3(5, 1, 33), new Vector3(-4, 1, 64), new Vector3(5, 1, 96), new Vector3(10, 1, 132), new Vector3(-10, 1, 143) })
+        foreach (var sp in new[] { new Vector3(-5, 1, -4), new Vector3(5, 1, 33), new Vector3(-4, 1, 64), new Vector3(5, 1, 96), new Vector3(-5, 1, 140), new Vector3(12, 1, 176), new Vector3(-1, 1, 222), new Vector3(15, 1, 250), new Vector3(-5, 1, 262) })
             Kit.Snake(sp, 2.5f);
 
         // krijesnice i trska
-        for (int i = 0; i < 40; i++)
-            Kit.Firefly(new Vector3(Random.Range(-15f, 15f), Random.Range(1.5f, 5f), Random.Range(-5f, 150f)));
-        for (int i = 0; i < 14; i++)
-            Kit.Reeds(new Vector3(Random.Range(-25f, 25f), 0, Random.Range(0f, 150f)) + Vector3.right * (Random.value > 0.5f ? 12f : -12f));
+        for (int i = 0; i < 70; i++)
+            Kit.Firefly(new Vector3(Random.Range(-15f, 20f), Random.Range(1.5f, 5f), Random.Range(-5f, 270f)));
+        for (int i = 0; i < 26; i++)
+            Kit.Reeds(new Vector3(Random.Range(-25f, 25f), 0, Random.Range(0f, 270f)) + Vector3.right * (Random.value > 0.5f ? 16f : -14f));
 
         Kit.Player(new Vector3(0, 1.1f, -4), -0.6f, "Level 2", "Murky Swamp", "Level3_Vulkan", required, false, "Level2");
         Save(scene, "Level2_Mocvara");
@@ -454,6 +546,7 @@ public static class RibblinLevelBuilder
         crownGp.targetable = false;
 
         var boss = root.gameObject.AddComponent<ToadKingBoss>();
+        boss.roarSound = "toad_roar"; boss.attackSound = "toad_attack"; boss.hurtSound = "toad_hurt";
         boss.crownPoint = crownGp;
         boss.bossName = "King Croakus";
         boss.maxHealth = 3;
@@ -484,7 +577,7 @@ public static class RibblinLevelBuilder
         t.colors["Rock"] = new Color(0.3f, 0.31f, 0.37f);
         t.colors["RockLight"] = new Color(0.4f, 0.41f, 0.48f);
         var scene = Kit.NewScene(t);
-        Kit.SetDifficulty(3.6f, 11f, true);     // Level 3: još brži i skaču na žabicu
+        Kit.SetDifficulty(3.9f, 12f, true);     // Level 3: skaču na žabicu
         Kit.WaterPlane(0f, "LavaPlane");
 
         // S0 – start
@@ -523,6 +616,8 @@ public static class RibblinLevelBuilder
         // S4 – vrtuljak
         Kit.Ground(new Vector3(0, 6.5f, 72), new Vector3(14, 7.5f, 12));
         Kit.SpinnerBar(new Vector3(0, 6.5f, 72), 11f, 85f);
+        Kit.Flyer(new Vector3(-3, 9.5f, 40), "bat");
+        Kit.Spitter(new Vector3(5.5f, 6.5f, 77), "lava");
         Kit.Slime(new Vector3(-4, 6.5f, 75), 2f, "SlimeOrange");
         Kit.Slime(new Vector3(4.5f, 6.5f, 69), 2f, "SlimeOrange");
         Kit.Fruit(new Vector3(5.5f, 7.5f, 76.5f));
@@ -554,7 +649,7 @@ public static class RibblinLevelBuilder
 
         // S7 – ispred bossa + skriveni otočić
         Kit.Ground(new Vector3(0, 15, 114), new Vector3(10, 16, 10));
-        Kit.Checkpoint(new Vector3(-3, 15, 111), true);
+        Kit.Checkpoint(new Vector3(-3, 15, 111));
         Kit.Grapple(new Vector3(10, 19f, 114));
         Kit.RoundGround(new Vector3(17, 14f, 114), 3f, 15f);
         Kit.Fruit(new Vector3(16, 15f, 113));
@@ -564,13 +659,66 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(0, 8f, 50));
         Kit.Fruit(new Vector3(-5, 6f, 2));
         Kit.Fruit(new Vector3(0, 16, 112));
-        int required = 16;   // Level 3: 16 od 18
-        Kit.Grapple(new Vector3(0, 20f, 125), required);
-        Kit.Grapple(new Vector3(0, 20.5f, 131), required);
+        // S8 – rijeka lave s kamenjem koje se ruši
+        Kit.FallingPlat(new Vector3(2, 15, 123), new Vector3(2.4f, 1f, 2.4f), "Rock", "Basalt");
+        Kit.FallingPlat(new Vector3(-2, 15.5f, 127.5f), new Vector3(2.4f, 1f, 2.4f), "RockLight", "Basalt");
+        Kit.FallingPlat(new Vector3(2, 16f, 132), new Vector3(2.4f, 1f, 2.4f), "Rock", "Basalt");
+        Kit.FallingPlat(new Vector3(-1.5f, 16f, 136.5f), new Vector3(2.4f, 1f, 2.4f), "RockLight", "Basalt");
+        Kit.FallingPlat(new Vector3(1, 16f, 141f), new Vector3(2.4f, 1f, 2.4f), "Rock", "Basalt");
+        Kit.Fruit(new Vector3(-2, 16.8f, 127.5f));
+        Kit.Fruit(new Vector3(-1.5f, 17.3f, 136.5f));
+
+        // S9 – utvrda s topovima i šišmišima
+        Kit.Ground(new Vector3(0, 16, 152), new Vector3(14, 17, 12));
+        Kit.Checkpoint(new Vector3(-4, 16, 147.5f));
+        Kit.Spitter(new Vector3(-5, 16, 156), "lava");
+        Kit.Spitter(new Vector3(5, 16, 155), "lava");
+        Kit.Flyer(new Vector3(0, 19f, 151), "bat");
+        Kit.Flyer(new Vector3(4, 19f, 148), "bat");
+        Kit.PopSpikes(new Vector3(0, 16, 150.5f), new Vector3(6, 0, 1.5f), 2.5f, 0f);
+        Kit.PopSpikes(new Vector3(0, 16, 154f), new Vector3(6, 0, 1.5f), 2.5f, 1.25f);
+        Kit.Slime(new Vector3(-3, 16, 152), 2.5f, "SlimeOrange", 1f, true, true);
+        Kit.Fruit(new Vector3(-6, 17, 150));
+        Kit.Fruit(new Vector3(6, 17, 150));
+        Kit.Fruit(new Vector3(0, 17, 157));
+
+        // S10 – toranj: penji se po stupovima ili jezikom
+        Kit.Ground(new Vector3(0, 30, 170), new Vector3(10, 31, 10));
+        float[] th = { 18.2f, 20.4f, 22.6f, 24.8f, 27f, 28.8f };
+        float[] tz = { 160f, 163.5f, 167f, 170.5f, 174f, 177.2f };
+        for (int i = 0; i < th.Length; i++) Kit.RoundGround(new Vector3(-7, th[i], tz[i]), 1.3f, th[i] + 1f);
+        Kit.Grapple(new Vector3(0, 25f, 160.5f));
+        Kit.Grapple(new Vector3(0, 33.5f, 163.5f));
+        Kit.Fruit(new Vector3(-7, 23.7f, 167f));
+        Kit.Checkpoint(new Vector3(-3, 30, 167));
+        Kit.Flyer(new Vector3(2, 33f, 171), "bat");
+        Kit.Slime(new Vector3(1, 30, 172), 2.5f, "SlimeOrange", 1f, true, true);
+        Kit.Fruit(new Vector3(3.5f, 31, 173.5f));
+        Kit.Fruit(new Vector3(-3.5f, 31, 173.5f));
+
+        // S11 – most s njihalima i gejzirima
+        Kit.Ground(new Vector3(0, 30, 189), new Vector3(3, 1.5f, 28));
+        Kit.Pendulum(new Vector3(0, 30, 181), 5f, 60f, 2.2f, 0f, "Basalt");
+        Kit.Geyser(new Vector3(0, 30, 186), 0.5f, 5f);
+        Kit.Pendulum(new Vector3(0, 30, 191), 5f, 60f, 2.2f, 0.5f, "Basalt");
+        Kit.Geyser(new Vector3(0, 30, 196), 1.7f, 5f);
+        Kit.Fruit(new Vector3(0, 31, 183.5f));
+        Kit.Fruit(new Vector3(0, 31, 193.5f));
+
+        // S12 – ispred bossa
+        Kit.Ground(new Vector3(0, 30, 209), new Vector3(12, 31, 12));
+        Kit.Checkpoint(new Vector3(-4, 30, 205), true);
+        Kit.Spitter(new Vector3(4, 30, 212), "lava");
+        Kit.Flyer(new Vector3(-2, 33, 211), "bat");
+        Kit.Fruit(new Vector3(-4.5f, 31, 213));
+
+        int required = Mathf.RoundToInt(Kit.FruitCount * 0.85f);   // Level 3: 85 % voća
+        Kit.Grapple(new Vector3(0, 35f, 221), required);
+        Kit.Grapple(new Vector3(0, 35.5f, 227), required);
 
         // arena
-        Vector3 arena = new Vector3(0, 15, 148);
-        Kit.RoundGround(arena, 16f, 17f);
+        Vector3 arena = new Vector3(0, 30, 245);
+        Kit.RoundGround(arena, 16f, 32f);
         Kit.Checkpoint(arena + new Vector3(-3, 0, -13));
         for (int i = 0; i < 10; i++)
         {
@@ -583,24 +731,32 @@ public static class RibblinLevelBuilder
         // vulkan u pozadini, bazaltni šiljci, iskre iz lave
         Kit.Volcano(new Vector3(-70, 0, 120), 38f, 55f);
         Kit.Volcano(new Vector3(80, 0, 40), 22f, 30f);
-        for (int i = 0; i < 26; i++)
+        for (int i = 0; i < 40; i++)
         {
             float x = Random.Range(14f, 45f) * (Random.value > 0.5f ? 1f : -1f);
-            Kit.BasaltSpire(new Vector3(x, -1f, Random.Range(-15f, 175f)), Random.Range(6f, 18f), Random.Range(2f, 4.5f));
+            Vector3 sp = new Vector3(x, -1f, Random.Range(-15f, 270f));
+            if (Vector3.Distance(new Vector3(sp.x, 0, sp.z), new Vector3(17, 0, 114)) < 8f) continue;
+            if (Vector3.Distance(new Vector3(sp.x, 0, sp.z), new Vector3(arena.x, 0, arena.z)) < 22f) continue;
+            Kit.BasaltSpire(sp, Random.Range(6f, 18f), Random.Range(2f, 4.5f));
         }
         Kit.Embers(new Vector3(0, 0, 40), 25f, 30);
         Kit.Embers(new Vector3(0, 0, 110), 25f, 30);
+        Kit.Embers(new Vector3(0, 0, 190), 25f, 30);
+        Kit.Volcano(new Vector3(70, 0, 220), 30f, 45f);
 
         // zmajevi: veliki lete iznad levela, mali šetaju po platformama
         Kit.FlyingDragon(new Vector3(0, 0, 60), 45f, 30f, 0.15f, "DragonGreen", 2.2f);
         Kit.FlyingDragon(new Vector3(0, 0, 110), 38f, 38f, -0.12f, "DragonPurple", 2.6f);
-        Kit.FlyingDragon(new Vector3(-10, 0, 150), 30f, 26f, 0.18f, "DragonTeal", 1.8f);
+        Kit.FlyingDragon(new Vector3(-10, 0, 150), 30f, 42f, 0.18f, "DragonTeal", 1.8f);
+        Kit.FlyingDragon(new Vector3(0, 0, 220), 40f, 50f, -0.14f, "DragonPurple", 2.4f);
         Kit.FlyingDragon(new Vector3(20, 0, 20), 50f, 45f, -0.1f, "DragonGreen", 3f);
         Kit.WalkingDragon(new Vector3(-4.5f, 3, -3), 2f, "DragonGreen");
         Kit.WalkingDragon(new Vector3(4, 6.5f, 36.5f), 1.5f, "DragonTeal");
         Kit.WalkingDragon(new Vector3(-5, 6.5f, 70), 1.5f, "DragonPurple");
         Kit.WalkingDragon(new Vector3(-4, 15, 89), 2f, "DragonGreen");
         Kit.WalkingDragon(new Vector3(3, 15, 112), 1.5f, "DragonTeal");
+        Kit.WalkingDragon(new Vector3(4, 16, 158), 1.5f, "DragonGreen");
+        Kit.WalkingDragon(new Vector3(3, 30, 207), 1.5f, "DragonTeal");
         Kit.WalkingDragon(arena + new Vector3(10, 0, -6), 2f, "DragonPurple");
 
         Kit.Player(new Vector3(0, 3.1f, -4), 0.5f, "Level 3", "Volcano", "Level4_Nebo", required, false, "Level3");
@@ -628,7 +784,8 @@ public static class RibblinLevelBuilder
         var hand = Kit.V(model, PrimitiveType.Cube, "Fist_R", new Vector3(2.35f, 1.9f, 0.2f), new Vector3(1.3f, 1.1f, 1.3f), "GolemDark");
 
         var crystals = new List<GrapplePoint>();
-        foreach (var lp in new[] { new Vector3(-2.3f, 5.5f, 0), new Vector3(2.3f, 5.5f, 0), new Vector3(0, 4.3f, -1.5f) })
+        foreach (var lp in new[] { new Vector3(-2.3f, 5.5f, 0), new Vector3(2.3f, 5.5f, 0), new Vector3(0, 4.3f, -1.5f),
+                                   new Vector3(-1.2f, 2.2f, 1.0f), new Vector3(1.2f, 2.2f, 1.0f) })
         {
             var c = Kit.Group("Crystal", pos, model);
             c.localPosition = lp;
@@ -644,6 +801,7 @@ public static class RibblinLevelBuilder
         }
 
         var boss = root.gameObject.AddComponent<GolemBoss>();
+        boss.roarSound = "golem_roar"; boss.attackSound = "golem_attack"; boss.hurtSound = "golem_hurt";
         boss.bossName = "Magmor the Molten";
         boss.maxHealth = 3;
         boss.arenaCenter = pos;
@@ -652,7 +810,7 @@ public static class RibblinLevelBuilder
         boss.model = model;
         boss.throwHand = hand.transform;
         boss.crystals = crystals.ToArray();
-        boss.hint = "Stay out of the red circles! When Magmor overheats, grab a glowing crystal on him with your tongue.";
+        boss.hint = "Stay out of the red circles! When Magmor overheats, quickly grab one of his 5 glowing crystals with your tongue.";
     }
 
     // =====================================================================
@@ -660,104 +818,152 @@ public static class RibblinLevelBuilder
     // =====================================================================
     static void BuildLevel4()
     {
+        // Nebesko kraljevstvo u zalazu sunca: mramor, zlato, duge i baloni – sasvim drukčije od otoka
         var t = new Theme
         {
             id = "L4",
-            sky = new Color(0.62f, 0.78f, 1f), fog = new Color(0.88f, 0.9f, 1f), fogStart = 70f, fogEnd = 320f,
-            ambSky = new Color(0.82f, 0.86f, 1f), ambEq = new Color(0.85f, 0.85f, 0.92f), ambGround = new Color(0.7f, 0.7f, 0.78f),
-            sun = new Color(1f, 0.97f, 0.9f), sunIntensity = 1.4f, sunEuler = new Vector3(55, -20, 0),
+            sky = new Color(0.98f, 0.7f, 0.62f), fog = new Color(1f, 0.82f, 0.78f), fogStart = 80f, fogEnd = 360f,
+            ambSky = new Color(1f, 0.85f, 0.85f), ambEq = new Color(0.95f, 0.8f, 0.85f), ambGround = new Color(0.65f, 0.55f, 0.7f),
+            sun = new Color(1f, 0.82f, 0.65f), sunIntensity = 1.35f, sunEuler = new Vector3(28, -50, 0),
         };
-        t.colors["Top"] = new Color(0.55f, 0.85f, 0.45f);
-        t.colors["Side"] = new Color(0.62f, 0.5f, 0.42f);
-        t.colors["SideDark"] = new Color(0.45f, 0.36f, 0.3f);
-        t.colors["Rock"] = new Color(0.75f, 0.72f, 0.8f);
+        t.colors["Top"] = new Color(0.78f, 0.7f, 0.95f);      // lila "trava"
+        t.colors["Side"] = new Color(0.95f, 0.93f, 0.9f);     // mramor
+        t.colors["SideDark"] = new Color(0.78f, 0.74f, 0.8f);
+        t.colors["Rock"] = new Color(0.95f, 0.93f, 0.9f);
+        t.colors["Cloud"] = new Color(1f, 0.9f, 0.92f);       // ružičasti oblaci
+        t.colors["Leaf"] = new Color(0.95f, 0.55f, 0.75f);    // ružičasto lišće
+        t.colors["LeafDark"] = new Color(0.8f, 0.4f, 0.65f);
         var scene = Kit.NewScene(t);
-        Kit.SetDifficulty(4.3f, 13f, true);     // Level 4: najbrži i najagresivniji
+        Kit.SetDifficulty(4.5f, 14f, true);     // Level 4: najbrži i najagresivniji
 
-        // more oblaka ispod
-        // oblaci samo sa strane (daleko od staze i arene), nikad ispod platformi
-        for (int i = 0; i < 50; i++)
+        // oblaci i ptice samo sa strane
+        for (int i = 0; i < 70; i++)
         {
-            float x = Random.Range(32f, 80f) * (Random.value > 0.5f ? 1f : -1f);
-            Kit.Cloud(new Vector3(x, Random.Range(-4f, 14f), Random.Range(-40f, 200f)), Random.Range(2f, 4f));
+            float x = Random.Range(35f, 95f) * (Random.value > 0.5f ? 1f : -1f);
+            Kit.Cloud(new Vector3(x, Random.Range(-6f, 30f), Random.Range(-40f, 300f)), Random.Range(2.5f, 5f));
         }
-        for (int i = 0; i < 8; i++)
-            Kit.Bird(new Vector3(-3, 0, 80), Random.Range(40f, 60f), Random.Range(18f, 32f), Random.Range(0.1f, 0.2f));
+        for (int i = 0; i < 10; i++)
+            Kit.Bird(new Vector3(0, 0, 130), Random.Range(45f, 70f), Random.Range(20f, 40f), Random.Range(0.08f, 0.18f) * (i % 2 == 0 ? 1f : -1f));
 
-        // S0 – start
+        // S0 – početni otok s hramom
         Kit.FloatIsland(new Vector3(0, 10, 0), 8f);
-        Kit.Palm(new Vector3(-5, 10, 3), 400);
-        Kit.Bush(new Vector3(4, 10, -3));
+        Kit.Temple(new Vector3(-4, 10, 2), 1.6f);
+        Kit.Windmill(new Vector3(5, 10, -3));
         Kit.Fruit(new Vector3(3, 11, 4));
-        Kit.Fruit(new Vector3(-4, 11, -3));
+        Kit.Fruit(new Vector3(-4, 11, -4));
+        Kit.Slime(new Vector3(2, 10, 1), 3f, "SlimeBlue");
 
-        // S1 – jezikom preko praznine
-        Kit.Grapple(new Vector3(0, 15f, 14));
-        Kit.Grapple(new Vector3(4, 15.5f, 22));
-        Kit.FloatIsland(new Vector3(8, 11, 30), 5f);
-        Kit.Fruit(new Vector3(2, 15.5f, 18));
-        Kit.Fruit(new Vector3(8, 12, 30));
+        // S1 – duga s iskačućim šiljcima
+        Kit.Rainbow(new Vector3(0, 10, 8), 22f, 3f);
+        Kit.PopSpikes(new Vector3(0, 10, 14), new Vector3(3, 0, 1.5f), 2.4f, 0f);
+        Kit.PopSpikes(new Vector3(0, 10, 22), new Vector3(3, 0, 1.5f), 2.4f, 1.2f);
+        Kit.Fruit(new Vector3(0, 11, 18));
+        Kit.Fruit(new Vector3(0, 11, 26));
 
-        // S2 – dizalo
-        Kit.Mover(new Vector3(8, 11, 38f), new Vector3(3, 0.8f, 3), new Vector3(0, 6, 0), 5f, 0.75f, "Top", "Side");
-        Kit.FloatIsland(new Vector3(8, 17, 48), 5f);
-        Kit.Slime(new Vector3(6, 17, 47), 2.5f, "SlimeBlue");
+        // S2 – otok s duhovima i oblakom koji pljuje
+        Kit.FloatIsland(new Vector3(0, 10, 37), 7f);
+        Kit.Flyer(new Vector3(-3, 13, 37), "sprite");
+        Kit.Flyer(new Vector3(3, 13, 40), "sprite");
+        Kit.Spitter(new Vector3(4, 10, 41), "cloud");
+        Kit.Slime(new Vector3(-2, 10, 35), 3f, "SlimeBlue");
+        Kit.MarbleColumn(new Vector3(-5, 10, 41), 5f);
+        Kit.Fruit(new Vector3(-4, 11, 34));
+        Kit.Fruit(new Vector3(4, 11, 35));
 
-        // S3 – trampolin do visokog otoka
-        Kit.BouncePad(new Vector3(10, 17, 50), 12f);
-        Kit.FloatIsland(new Vector3(6, 26, 58), 4f);
-        Kit.Fruit(new Vector3(5, 27, 57));
-        Kit.Fruit(new Vector3(7, 27, 59));
-        Kit.Grapple(new Vector3(2, 29f, 70));
-        Kit.Grapple(new Vector3(-4, 28f, 83));
+        // S3 – baloni
+        Kit.Balloon(new Vector3(0, 10, 47.5f), new Vector3(0, 6, 0), 5f, 0.75f, "Balloon1");
+        Kit.Balloon(new Vector3(-3, 16, 54), new Vector3(6, 0, 0), 4.5f, 0f, "Balloon2");
+        Kit.Balloon(new Vector3(6, 16, 61), new Vector3(0, 3, 0), 4f, 0.25f, "Balloon3");
+        Kit.Fruit(new Vector3(0, 18, 54));
+        Kit.Fruit(new Vector3(6, 21, 61));
 
-        // S4 – otok s vrtuljkom
-        Kit.FloatIsland(new Vector3(-6, 20, 92), 7f);
-        Kit.Checkpoint(new Vector3(-9, 20, 87));
-        Kit.SpinnerBar(new Vector3(-6, 20, 93), 10f, 90f);
-        Kit.Slime(new Vector3(-2, 20, 96), 2.5f, "SlimeBlue");
-        Kit.Slime(new Vector3(-10, 20, 96), 2.5f, "SlimeBlue");
-        Kit.Fruit(new Vector3(-1, 21, 89));
-        Kit.Slime(new Vector3(-6, 20, 120), 3f, "SlimeBlue");
-        Kit.Slime(new Vector3(3, 10, 2), 3f, "SlimeBlue");
-        Kit.Fruit(new Vector3(-11, 21, 90));
+        // S4 – otok s vjetrenjačom
+        Kit.FloatIsland(new Vector3(6, 16, 72), 6f);
+        Kit.Checkpoint(new Vector3(3, 16, 68));
+        Kit.Windmill(new Vector3(9, 16, 75));
+        Kit.Slime(new Vector3(6, 16, 72), 3f, "SlimeBlue", 1f, true, true);
+        Kit.Spitter(new Vector3(2, 16, 75), "cloud");
+        Kit.Fruit(new Vector3(9, 17, 70));
+        Kit.Fruit(new Vector3(3, 17, 76));
 
-        // S5 – pokretni oblaci
-        Kit.Mover(new Vector3(-10, 20, 103.5f), new Vector3(3, 0.6f, 3), new Vector3(8, 0, 0), 4f, 0f, "Top", "Side");
-        Kit.Mover(new Vector3(-2, 20, 109), new Vector3(3, 0.6f, 3), new Vector3(-8, 0, 0), 4f, 0f, "Top", "Side");
-        Kit.Fruit(new Vector3(-6, 21.8f, 106));
+        // S5 – jezikom preko velike praznine (duhovi patroliraju)
+        Kit.Grapple(new Vector3(6, 22, 84));
+        Kit.Grapple(new Vector3(2, 24, 93));
+        Kit.Grapple(new Vector3(-2, 23, 102));
+        Kit.Flyer(new Vector3(4, 21, 89), "sprite");
+        Kit.Flyer(new Vector3(0, 22, 98), "sprite");
+        Kit.Fruit(new Vector3(4, 23.5f, 88.5f));
+        Kit.Fruit(new Vector3(0, 23.5f, 97.5f));
 
-        // S6 – ispred bossa + bonus otočić
-        Kit.FloatIsland(new Vector3(-6, 20, 118), 6f);
-        Kit.Checkpoint(new Vector3(-9, 20, 114), true);
-        Kit.Grapple(new Vector3(1, 25f, 118));
-        Kit.FloatIsland(new Vector3(7, 22, 118), 3f);
-        Kit.Fruit(new Vector3(6.5f, 23, 117));
-        Kit.Fruit(new Vector3(7.5f, 23, 119.5f));
-        Kit.Fruit(new Vector3(-3, 21, 121));
-        Kit.Palm(new Vector3(-9, 20, 121), 401);
+        // S6 – mramorni trg sa zamkama
+        Kit.FloatIsland(new Vector3(-4, 18, 115), 8f);
+        Kit.Checkpoint(new Vector3(-7, 18, 109));
+        Kit.Pendulum(new Vector3(-4, 18, 113), 5f, 60f, 2.2f, 0f, "Marble");
+        Kit.Pendulum(new Vector3(-4, 18, 118), 5f, 60f, 2.2f, 0.5f, "Marble");
+        Kit.PopSpikes(new Vector3(-8, 18, 115.5f), new Vector3(2, 0, 4), 2.6f, 0.6f);
+        Kit.Slime(new Vector3(-1, 18, 116), 3f, "SlimeBlue");
+        Kit.Slime(new Vector3(-7, 18, 119), 3f, "SlimeBlue");
+        Kit.Temple(new Vector3(0, 18, 120), 1.4f);
+        Kit.Fruit(new Vector3(-9, 19, 112));
+        Kit.Fruit(new Vector3(1, 19, 111));
+        Kit.Fruit(new Vector3(-4, 19, 121));
 
-        Kit.Fruit(new Vector3(-6, 21, 97));
-        Kit.Fruit(new Vector3(10, 18, 47));
-        Kit.Fruit(new Vector3(4, 16.5f, 26));
-        Kit.Fruit(new Vector3(-2, 21.8f, 109));
+        // S7 – stepenice od oblaka koje se ruše
+        Kit.FallingPlat(new Vector3(-4, 19, 126.5f), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(0, 20, 131), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(-3, 21, 135.5f), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(1, 22, 140), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(-2, 23, 144.5f), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.Fruit(new Vector3(0, 21.5f, 131));
+        Kit.Fruit(new Vector3(1, 23.5f, 140));
+
+        // S8 – zlatni otok s trampolinom do hrama u zraku
+        Kit.FloatIsland(new Vector3(0, 24, 156), 7f);
+        Kit.Checkpoint(new Vector3(-3, 24, 151));
+        Kit.Spitter(new Vector3(-4, 24, 159), "cloud");
+        Kit.Spitter(new Vector3(4, 24, 160), "cloud");
+        Kit.Flyer(new Vector3(0, 27, 157), "sprite");
+        Kit.Flyer(new Vector3(-3, 27, 154), "sprite");
+        Kit.Slime(new Vector3(2, 24, 154), 3f, "SlimeBlue", 1f, true, true);
+        Kit.BouncePad(new Vector3(4, 24, 153), 12f);
+        Kit.FloatIsland(new Vector3(9, 35, 160), 3.5f);
+        Kit.Temple(new Vector3(9, 35, 160), 1.2f);
+        Kit.Fruit(new Vector3(8, 36, 159));
+        Kit.Fruit(new Vector3(10, 36, 161));
+        Kit.Fruit(new Vector3(-5, 25, 156));
+
+        // S9 – duga duga s vrtuljkom i njihalom
+        Kit.Rainbow(new Vector3(0, 24, 163), 30f, 3f);
+        Kit.SpinnerBar(new Vector3(0, 24, 171), 6f, 110f);
+        Kit.Pendulum(new Vector3(0, 24, 179), 5f, 60f, 2f, 0.2f, "Marble");
+        Kit.PopSpikes(new Vector3(0, 24, 186), new Vector3(3, 0, 1.5f), 2.2f, 0.4f);
+        Kit.Fruit(new Vector3(0, 25, 175));
+        Kit.Fruit(new Vector3(0, 25, 183));
+
+        // S10 – ispred bossa
+        Kit.FloatIsland(new Vector3(0, 24, 199), 7f);
+        Kit.Checkpoint(new Vector3(-3, 24, 194), true);
+        Kit.Temple(new Vector3(4, 24, 201), 1.4f);
+        Kit.Flyer(new Vector3(-3, 27, 201), "sprite");
+        Kit.Fruit(new Vector3(-4, 25, 202));
+
         int required = Kit.FruitCount;   // Level 4: SVE voće
-        Kit.Grapple(new Vector3(-6, 25f, 128), required);
-        Kit.Grapple(new Vector3(-6, 25.5f, 134), required);
+        Kit.Grapple(new Vector3(0, 29f, 211), required);
+        Kit.Grapple(new Vector3(0, 29.5f, 217), required);
 
-        // arena
-        Vector3 arena = new Vector3(-6, 20, 151);
+        // arena – mramorni otok sa zlatnim stupovima
+        Vector3 arena = new Vector3(0, 24, 235);
         Kit.FloatIsland(arena, 16f);
         Kit.Checkpoint(arena + new Vector3(-3, 0, -13));
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 8; i++)
         {
-            float a = i / 6f * Mathf.PI * 2f + 0.3f;
-            Kit.Box("Column", arena + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * 15f + Vector3.up * 2.5f, new Vector3(1.2f, 5f, 1.2f), "Rock");
+            float a = i / 8f * Mathf.PI * 2f + 0.3f;
+            Kit.MarbleColumn(arena + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * 15f, 6f);
         }
         var portal = Kit.Portal(arena + new Vector3(0, 0, 12), "Ribblin_End", arena);
         BuildBird(arena, portal);
 
-        Kit.Player(new Vector3(0, 10.1f, -4), -12f, "Level 4", "Sky Islands", "Ribblin_End", required, false, "Level4");
+        Kit.Player(new Vector3(0, 10.1f, -4), -12f, "Level 4", "Sky Kingdom", "Ribblin_End", required, false, "Level4");
         Save(scene, "Level4_Nebo");
     }
 
@@ -790,6 +996,7 @@ public static class RibblinLevelBuilder
         gp.targetable = false;
 
         var boss = root.gameObject.AddComponent<StormBirdBoss>();
+        boss.roarSound = "bird_roar"; boss.attackSound = "bird_attack"; boss.hurtSound = "bird_hurt";
         boss.bossName = "Tempestra, Queen of Storms";
         boss.maxHealth = 4;
         boss.arenaCenter = arena;
@@ -799,7 +1006,7 @@ public static class RibblinLevelBuilder
         boss.wingL = wingL;
         boss.wingR = wingR;
         boss.backPoint = gp;
-        boss.hint = "Run from the red circles! When Tempestra lands dizzy, jump on her or grab her with your tongue.";
+        boss.hint = "Dodge her feathers, fight the storm wind and her dive! When she lands dizzy, jump on her or grab her with your tongue.";
     }
 
     // =====================================================================
