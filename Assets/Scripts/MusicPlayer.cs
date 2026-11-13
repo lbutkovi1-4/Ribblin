@@ -43,7 +43,7 @@ public class MusicPlayer : MonoBehaviour
 
     void Update()
     {
-        float pause = GameManager.Paused ? 0.4f : 1f;
+        float pause = (GameManager.Paused ? 0.4f : 1f) * GameSettings.MusicVolume;
         float k = Time.unscaledDeltaTime * 0.35f;
         bool useBoss = bossMode && boss != null;
         if (main) main.volume = Mathf.MoveTowards(main.volume, useBoss ? 0f : volume * pause, k);

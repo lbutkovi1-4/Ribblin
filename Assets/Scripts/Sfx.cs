@@ -29,6 +29,6 @@ public static class Sfx
         }
         if (clip == null) return;
         source.pitch = 1f;
-        source.PlayOneShot(clip, volume);
+        source.PlayOneShot(clip, volume * GameSettings.SfxVolume);
     }
 }
