@@ -37,8 +37,9 @@ public class ThirdPersonCamera : MonoBehaviour
         if (mouse != null && !GameManager.Paused && Cursor.lockState == CursorLockMode.Locked)
         {
             Vector2 d = mouse.delta.ReadValue();
-            yaw += d.x * sensitivity;
-            pitch -= d.y * sensitivity;
+            float sens = sensitivity * GameSettings.MouseSensitivity;
+            yaw += d.x * sens;
+            pitch -= d.y * sens;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
             float scroll = mouse.scroll.ReadValue().y;
             if (Mathf.Abs(scroll) > 0.01f) distance = Mathf.Clamp(distance - Mathf.Sign(scroll) * 0.8f, minZoom, maxZoom);
