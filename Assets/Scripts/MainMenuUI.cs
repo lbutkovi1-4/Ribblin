@@ -9,6 +9,7 @@ public class MainMenuUI : MonoBehaviour
     bool showLevels;
     bool showHelp;
     bool showCredits;
+    bool showOptions;
 
     void Start()
     {
@@ -23,6 +24,17 @@ public class MainMenuUI : MonoBehaviour
         float s = Ui.S;
         Ui.Text(new Rect(0, 90 * s, Screen.width, 200 * s), "RIBBLIN", Ui.Label(170, TextAnchor.MiddleCenter), new Color(0.6f, 1f, 0.35f));
         Ui.Text(new Rect(0, 270 * s, Screen.width, 60 * s), "A little frog's big adventure", Ui.Label(44, TextAnchor.MiddleCenter), new Color(1f, 0.92f, 0.6f));
+
+        if (showOptions)
+        {
+            var box = Ui.Centered(380, 1000, 330);
+            Ui.Box(box, new Color(0, 0, 0, 0.45f));
+            GameSettings.MusicVolume = Ui.Slider(Ui.Centered(420, 900, 70), "Music", GameSettings.MusicVolume, 0f, 1f);
+            GameSettings.SfxVolume = Ui.Slider(Ui.Centered(510, 900, 70), "Sounds", GameSettings.SfxVolume, 0f, 1f);
+            GameSettings.MouseSensitivity = Ui.Slider(Ui.Centered(600, 900, 70), "Mouse", GameSettings.MouseSensitivity, 0.3f, 2f);
+            if (Ui.Button(Ui.Centered(840, 460, 80), "Back")) { GameSettings.Save(); showOptions = false; }
+            return;
+        }
 
         if (showLevels)
         {
@@ -62,14 +74,19 @@ public class MainMenuUI : MonoBehaviour
             return;
         }
 
-        if (Ui.Button(Ui.Centered(420, 460, 85), "New game"))
+        if (GameStats.HasBestTime)
+            Ui.Text(new Rect(0, 330 * s, Screen.width, 44 * s), "Best time: " + GameStats.Format(GameStats.BestTime), Ui.Label(30, TextAnchor.MiddleCenter));
+
+        if (Ui.Button(Ui.Centered(395, 460, 80), "New game"))
         {
             GameStats.Reset();
+            GameStats.FullRun = true;   // samo cijela igra od 1. razine ulazi u najbolje vrijeme
             SceneManager.LoadScene(levelScenes[0]);
         }
-        if (Ui.Button(Ui.Centered(525, 460, 85), "Select level")) showLevels = true;
-        if (Ui.Button(Ui.Centered(630, 460, 85), "Controls")) showHelp = true;
-        if (Ui.Button(Ui.Centered(735, 460, 85), "Credits")) showCredits = true;
-        if (Ui.Button(Ui.Centered(840, 460, 85), "Quit")) Application.Quit();
+        if (Ui.Button(Ui.Centered(490, 460, 80), "Select level")) showLevels = true;
+        if (Ui.Button(Ui.Centered(585, 460, 80), "Options")) showOptions = true;
+        if (Ui.Button(Ui.Centered(680, 460, 80), "Controls")) showHelp = true;
+        if (Ui.Button(Ui.Centered(775, 460, 80), "Credits")) showCredits = true;
+        if (Ui.Button(Ui.Centered(870, 460, 80), "Quit")) Application.Quit();
     }
 }
