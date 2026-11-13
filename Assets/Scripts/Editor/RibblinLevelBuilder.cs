@@ -62,6 +62,10 @@ public static class RibblinLevelBuilder
             if (System.IO.File.Exists(path)) list.Add(new EditorBuildSettingsScene(path, true));
         }
         EditorBuildSettings.scenes = list.ToArray();
+
+        // naziv igre i autorica (vidi se u naslovu prozora i u buildu)
+        PlayerSettings.productName = "Ribblin";
+        PlayerSettings.companyName = "Lidia Butkovic";
     }
 
     // =====================================================================
