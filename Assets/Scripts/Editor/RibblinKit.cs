@@ -1,9 +1,11 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 // Boje i atmosfera jednog levela.
@@ -121,10 +123,10 @@ public static class Kit
 
         var sunGo = new GameObject("Sun");
         var l = sunGo.AddComponent<Light>();
-        l.type = LightType.Directional;
+        l.type = UnityEngine.LightType.Directional;
         l.color = theme.sun;
         l.intensity = theme.sunIntensity;
-        l.shadows = LightShadows.Soft;
+        l.shadows = UnityEngine.LightShadows.Soft;
         sunGo.transform.rotation = Quaternion.Euler(theme.sunEuler);
 
         RenderSettings.skybox = null;
@@ -140,6 +142,7 @@ public static class Kit
         RenderSettings.fogEndDistance = theme.fogEnd;
 
         Root = new GameObject("Level").transform;
+        MakePostFx(theme);
         Random.InitState(theme.id.GetHashCode());
         return scene;
     }
@@ -154,6 +157,11 @@ public static class Kit
         cam.backgroundColor = T.sky;
         cam.farClipPlane = 500f;
         cam.fieldOfView = 60f;
+        // uključi post-processing (Global Volume) i glađe rubove (SMAA)
+        var camData = cam.GetUniversalAdditionalCameraData();
+        camData.renderPostProcessing = true;
+        camData.antialiasing = UnityEngine.Rendering.Universal.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+        camData.antialiasingQuality = UnityEngine.Rendering.Universal.AntialiasingQuality.High;
         camGo.transform.position = pos;
         return cam;
     }
@@ -1016,6 +1024,7 @@ public static class Kit
     {
         var model = new GameObject("Model").transform;
         model.SetParent(parent, false);
+        if (TryCustomFrog(model)) return model;   // vlastiti model iz Assets/Models, ako postoji
         V(model, PrimitiveType.Sphere, "Body", new Vector3(0, 0.55f, 0), new Vector3(1.0f, 0.85f, 1.1f), "Frog");
         V(model, PrimitiveType.Sphere, "Belly", new Vector3(0, 0.45f, 0.25f), new Vector3(0.75f, 0.6f, 0.7f), "FrogBelly");
         V(model, PrimitiveType.Sphere, "Eye_L", new Vector3(-0.25f, 1.0f, 0.25f), Vector3.one * 0.38f, "Frog");
@@ -1049,6 +1058,7 @@ public static class Kit
         var tg = frog.AddComponent<TongueGrapple>();
         tg.tongueMaterial = Mat("Tongue");
         frog.AddComponent<PlayerHealth>();
+        frog.AddComponent<FrogAnimator>();
 
         var cam = MakeCamera(spawn + new Vector3(0, 3, -7));
         var tpc = cam.gameObject.AddComponent<ThirdPersonCamera>();
@@ -1064,6 +1074,258 @@ public static class Kit
         gm.fxMaterials = FxMaterials();
         Music(music);
         return frog;
+    }
+
+    // =====================================================================
+    // POST-PROCESSING (URP Global Volume) – po jedan profil za svaku scenu
+    // =====================================================================
+    public const string PostFxFolder = "Assets/Settings/PostFx";
+
+    static void MakePostFx(Theme theme)
+    {
+        EnsureFolder("Assets/Settings");
+        EnsureFolder(PostFxFolder);
+        string path = $"{PostFxFolder}/{theme.id}_PostFx.asset";
+        AssetDatabase.DeleteAsset(path);
+        var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+        AssetDatabase.CreateAsset(profile, path);
+
+        // zajedničke vrijednosti, pa malo drugačije za svaki svijet
+        float bloom = 0.35f, threshold = 1.1f, sat = 12f, con = 10f, vig = 0.22f, temp = 0f;
+        switch (theme.id)
+        {
+            case "L1": sat = 18f; break;                                   // sunčani otok – živahne boje
+            case "L2": sat = 4f; vig = 0.32f; con = 14f; break;             // mutna močvara – tamniji rubovi
+            case "L3": bloom = 0.9f; threshold = 0.9f; con = 16f; break;   // vulkan – lava svijetli
+            case "L4": temp = 12f; bloom = 0.5f; break;                    // zlatni zalazak – toplije
+            case "End": temp = 10f; break;
+        }
+
+        var tm = AddFx<Tonemapping>(profile);
+        tm.mode.Override(TonemappingMode.Neutral);
+        var bl = AddFx<Bloom>(profile);
+        bl.intensity.Override(bloom);
+        bl.threshold.Override(threshold);
+        bl.scatter.Override(0.6f);
+        var ca = AddFx<ColorAdjustments>(profile);
+        ca.saturation.Override(sat);
+        ca.contrast.Override(con);
+        var vg = AddFx<Vignette>(profile);
+        vg.intensity.Override(vig);
+        vg.smoothness.Override(0.45f);
+        if (temp != 0f)
+        {
+            var wb = AddFx<WhiteBalance>(profile);
+            wb.temperature.Override(temp);
+        }
+        EditorUtility.SetDirty(profile);
+        AssetDatabase.SaveAssets();
+
+        var go = new GameObject("Global Volume (PostFx)");
+        var volume = go.AddComponent<Volume>();
+        volume.isGlobal = true;
+        volume.sharedProfile = profile;
+    }
+
+    static T AddFx<T>(VolumeProfile profile) where T : VolumeComponent
+    {
+        var c = profile.Add<T>(true);
+        c.name = typeof(T).Name;
+        c.hideFlags = HideFlags.HideInInspector | HideFlags.HideInHierarchy;
+        AssetDatabase.AddObjectToAsset(c, profile);
+        return c;
+    }
+
+    // =====================================================================
+    // VLASTITI MODEL ŽABE
+    // Stavi svoj model u mapu Assets/Models i nazovi ga "Frog" (Frog.fbx, Frog.prefab...).
+    // Animacije se traže u datotekama u Assets/Models čije ime sadrži "frog",
+    // po imenima: idle, hop/run/walk, jump, tongue/attack/eat.
+    // Ako modela nema, koristi se žaba od osnovnih oblika.
+    // =====================================================================
+    public const string ModelFolder = "Assets/Models";
+    public static float FrogModelHeight = 1.1f;   // visina na koju se model automatski skalira
+    public static float FrogModelYaw = 0f;        // ako model gleda unatrag, stavi 180
+
+    static string FindFrogAsset()
+    {
+        if (!AssetDatabase.IsValidFolder(ModelFolder)) return null;
+        foreach (var filter in new[] { "Frog t:Prefab", "Frog t:Model" })
+            foreach (var guid in AssetDatabase.FindAssets(filter, new[] { ModelFolder }))
+            {
+                string p = AssetDatabase.GUIDToAssetPath(guid);
+                if (System.IO.Path.GetFileNameWithoutExtension(p).Equals("Frog", System.StringComparison.OrdinalIgnoreCase))
+                    return p;
+            }
+        return null;
+    }
+
+    static bool TryCustomFrog(Transform model)
+    {
+        string path = FindFrogAsset();
+        if (path == null) return false;
+
+        var clips = CollectFrogClips();   // prije učitavanja: može promijeniti postavke uvoza
+        var src = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (src == null) return false;
+
+        var inst = (GameObject)PrefabUtility.InstantiatePrefab(src);
+        PrefabUtility.UnpackPrefabInstance(inst, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+        inst.name = "FrogMesh";
+        inst.transform.SetParent(model, false);
+        inst.transform.localPosition = Vector3.zero;
+        inst.transform.localRotation = Quaternion.Euler(0, FrogModelYaw, 0);
+
+        // collideri modela ne trebaju (žabica ima CharacterController) i smetali bi jeziku
+        foreach (var c in inst.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);
+
+        // automatski: skaliraj na FrogModelHeight, centriraj i stavi stopala na tlo
+        var rends = inst.GetComponentsInChildren<Renderer>();
+        if (rends.Length > 0)
+        {
+            Bounds b = WorldBounds(rends);
+            if (b.size.y > 0.0001f) inst.transform.localScale *= FrogModelHeight / b.size.y;
+            b = WorldBounds(rends);
+            inst.transform.position += model.position - new Vector3(b.center.x, b.min.y, b.center.z);
+        }
+
+        // animacije: ako model već ima svoj Animator Controller, ostavi ga; inače složi jedan iz klipova
+        var anim = inst.GetComponentInChildren<Animator>();
+        if ((anim == null || anim.runtimeAnimatorController == null) && clips.Count > 0)
+        {
+            if (anim == null) anim = inst.AddComponent<Animator>();
+            anim.runtimeAnimatorController = BuildFrogController(clips);
+            if (anim.avatar == null)
+                foreach (var o in AssetDatabase.LoadAllAssetsAtPath(path))
+                    if (o is Avatar av) { anim.avatar = av; break; }
+        }
+        if (anim) anim.applyRootMotion = false;
+        Debug.Log($"Ribblin: koristim vlastiti model žabe ({path}), animacija: {clips.Count}");
+        return true;
+    }
+
+    static Bounds WorldBounds(Renderer[] rends)
+    {
+        Bounds b = rends[0].bounds;
+        foreach (var r in rends) b.Encapsulate(r.bounds);
+        return b;
+    }
+
+    static List<AnimationClip> CollectFrogClips()
+    {
+        var clips = new List<AnimationClip>();
+        if (!AssetDatabase.IsValidFolder(ModelFolder)) return clips;
+        foreach (var guid in AssetDatabase.FindAssets("", new[] { ModelFolder }))
+        {
+            string p = AssetDatabase.GUIDToAssetPath(guid);
+            if (AssetDatabase.IsValidFolder(p) || !p.ToLowerInvariant().Contains("frog")) continue;
+            if (p.EndsWith(".controller")) continue;
+            if (AssetImporter.GetAtPath(p) is ModelImporter imp) PrepareModelClips(imp);
+            foreach (var o in AssetDatabase.LoadAllAssetsAtPath(p))
+            {
+                if (!(o is AnimationClip c) || c.name.StartsWith("__preview__") || clips.Contains(c)) continue;
+                if (!(AssetImporter.GetAtPath(p) is ModelImporter) && IsLoopName(c.name))
+                {
+                    var st = AnimationUtility.GetAnimationClipSettings(c);
+                    if (!st.loopTime) { st.loopTime = true; AnimationUtility.SetAnimationClipSettings(c, st); }
+                }
+                clips.Add(c);
+            }
+        }
+        return clips;
+    }
+
+    // Uvoz modela: animacije kao Generic (rade s Animatorom), idle i hodanje se ponavljaju.
+    static void PrepareModelClips(ModelImporter imp)
+    {
+        if (!imp.importAnimation) return;
+        bool dirty = false;
+        if (imp.animationType == ModelImporterAnimationType.Legacy || imp.animationType == ModelImporterAnimationType.None)
+        {
+            imp.animationType = ModelImporterAnimationType.Generic;
+            dirty = true;
+        }
+        var list = imp.clipAnimations.Length > 0 ? imp.clipAnimations : imp.defaultClipAnimations;
+        foreach (var c in list)
+            if (IsLoopName(c.name) && !c.loopTime) { c.loopTime = true; dirty = true; }
+        if (dirty)
+        {
+            imp.clipAnimations = list;
+            imp.SaveAndReimport();
+        }
+    }
+
+    static bool IsLoopName(string n)
+    {
+        n = n.ToLowerInvariant();
+        return n.Contains("idle") || n.Contains("walk") || n.Contains("run") || n.Contains("hop") || n.Contains("move");
+    }
+
+    static AnimationClip Pick(List<AnimationClip> clips, params string[] keys)
+    {
+        foreach (var k in keys)
+            foreach (var c in clips)
+                if (c.name.ToLowerInvariant().Contains(k)) return c;
+        return null;
+    }
+
+    // Složi Animator Controller: Idle ↔ Move (po brzini), Jump (na skok), Tongue (dok je jezik vani).
+    static RuntimeAnimatorController BuildFrogController(List<AnimationClip> clips)
+    {
+        var idle = Pick(clips, "idle", "stand", "breath");
+        var move = Pick(clips, "hop", "run", "walk", "move");
+        var jump = Pick(clips, "jump", "leap");
+        var tongue = Pick(clips, "tongue", "attack", "eat", "bite", "lick");
+        if (idle == null) idle = move ?? clips[0];
+
+        string path = ModelFolder + "/Frog_Generated.controller";
+        AssetDatabase.DeleteAsset(path);
+        var ctrl = AnimatorController.CreateAnimatorControllerAtPath(path);
+        ctrl.AddParameter("Speed", AnimatorControllerParameterType.Float);
+        ctrl.AddParameter("Grounded", AnimatorControllerParameterType.Bool);
+        ctrl.AddParameter("Jump", AnimatorControllerParameterType.Trigger);
+        ctrl.AddParameter("Tongue", AnimatorControllerParameterType.Bool);
+        var sm = ctrl.layers[0].stateMachine;
+
+        var idleS = sm.AddState("Idle");
+        idleS.motion = idle;
+        sm.defaultState = idleS;
+
+        if (move != null && move != idle)
+        {
+            var moveS = sm.AddState("Move");
+            moveS.motion = move;
+            var t = idleS.AddTransition(moveS);
+            t.hasExitTime = false; t.duration = 0.1f;
+            t.AddCondition(AnimatorConditionMode.Greater, 0.6f, "Speed");
+            t = moveS.AddTransition(idleS);
+            t.hasExitTime = false; t.duration = 0.15f;
+            t.AddCondition(AnimatorConditionMode.Less, 0.6f, "Speed");
+        }
+        if (jump != null)
+        {
+            var jumpS = sm.AddState("Jump");
+            jumpS.motion = jump;
+            var t = sm.AddAnyStateTransition(jumpS);
+            t.hasExitTime = false; t.duration = 0.05f; t.canTransitionToSelf = true;
+            t.AddCondition(AnimatorConditionMode.If, 0f, "Jump");
+            var back = jumpS.AddTransition(idleS);
+            back.hasExitTime = true; back.exitTime = 0.6f; back.duration = 0.1f;
+            back.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+        }
+        if (tongue != null)
+        {
+            var tongueS = sm.AddState("Tongue");
+            tongueS.motion = tongue;
+            var t = sm.AddAnyStateTransition(tongueS);
+            t.hasExitTime = false; t.duration = 0.05f; t.canTransitionToSelf = false;
+            t.AddCondition(AnimatorConditionMode.If, 0f, "Tongue");
+            var back = tongueS.AddTransition(idleS);
+            back.hasExitTime = false; back.duration = 0.1f;
+            back.AddCondition(AnimatorConditionMode.IfNot, 0f, "Tongue");
+        }
+        AssetDatabase.SaveAssets();
+        return ctrl;
     }
 }
 #endif

@@ -33,6 +33,7 @@ public class FrogController : MonoBehaviour
     public bool IsGrounded => controller != null && controller.isGrounded;
     public Transform GroundTransform { get; private set; }
     public Vector3 Wind { get; set; }      // vjetar (npr. boss) – postavlja se svaki frame
+    public event System.Action Jumped;     // javlja animaciji da je žabica skočila
 
     CharacterController controller;
     Vector3 velocity;
@@ -164,6 +165,7 @@ public class FrogController : MonoBehaviour
         lastJumpPressTime = -10f;
         squash = new Vector3(0.8f, 1.25f, 0.8f);
         Sfx.Play(air ? "jump2" : "jump", 0.4f);
+        Jumped?.Invoke();
     }
 
     public void Bounce(float height)

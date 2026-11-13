@@ -29,7 +29,11 @@ public class TongueGrapple : MonoBehaviour
     Vector3 lashTip;
 
     public bool HasTarget => aimed != null || aimedEnemy != null;
-    Vector3 Mouth => transform.position + Vector3.up * 0.55f + transform.forward * 0.45f;
+    public bool IsBusy => state != State.Idle;   // jezik je vani (za animaciju)
+
+    // Ako model žabe ima prazan objekt "Mouth", jezik izlazi iz njega; inače iz procijenjene točke.
+    Transform mouthPoint;
+    Vector3 Mouth => mouthPoint ? mouthPoint.position : transform.position + Vector3.up * 0.55f + transform.forward * 0.45f;
 
     void Awake()
     {
@@ -47,6 +51,7 @@ public class TongueGrapple : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
+        mouthPoint = FindDeep(transform, "Mouth");
         line.material = tongueMaterial ? tongueMaterial : Fx.Mat("Tongue");
     }
 
@@ -223,6 +228,17 @@ public class TongueGrapple : MonoBehaviour
             Cancel();
             if (arrived && point) point.NotifyGrappled();
         }
+    }
+
+    static Transform FindDeep(Transform t, string name)
+    {
+        foreach (Transform c in t)
+        {
+            if (c.name == name) return c;
+            var r = FindDeep(c, name);
+            if (r) return r;
+        }
+        return null;
     }
 
     void DrawTongue(Vector3 tip)
