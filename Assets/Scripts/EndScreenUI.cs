@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class EndScreenUI : MonoBehaviour
 {
     public string menuScene = "Ribblin_Menu";
+    bool newBest;
 
     void Start()
     {
@@ -13,6 +14,7 @@ public class EndScreenUI : MonoBehaviour
         Cursor.visible = true;
         Sfx.Init();
         Sfx.Play("win", 0.7f);
+        newBest = GameStats.FinishRun();
     }
 
     void OnGUI()
@@ -30,6 +32,11 @@ public class EndScreenUI : MonoBehaviour
             $"Bosses defeated: {GameStats.BossesDefeated}\n" +
             $"Falls: {GameStats.Deaths}",
             Ui.Label(40, TextAnchor.MiddleCenter));
+
+        if (newBest)
+            Ui.Text(new Rect(0, 675 * s, Screen.width, 40 * s), "New best time!", Ui.Label(40, TextAnchor.MiddleCenter), new Color(1f, 0.85f, 0.3f));
+        else if (GameStats.HasBestTime)
+            Ui.Text(new Rect(0, 675 * s, Screen.width, 40 * s), "Best time: " + GameStats.Format(GameStats.BestTime), Ui.Label(32, TextAnchor.MiddleCenter));
 
         if (Ui.Button(Ui.Centered(720, 460, 85), "Main menu")) SceneManager.LoadScene(menuScene);
         if (Ui.Button(Ui.Centered(825, 460, 85), "Quit")) Application.Quit();
