@@ -132,6 +132,7 @@ public class GameManager : MonoBehaviour
 
     public void SetPaused(bool value)
     {
+        if (Paused && !value) GameSettings.Save();   // spremi postavke kad se izađe iz pauze
         Paused = value;
         Time.timeScale = value ? 0f : 1f;
         LockCursor(!value);
@@ -222,6 +223,10 @@ public class GameManager : MonoBehaviour
                 SetPaused(false);
                 SceneManager.LoadScene(menuScene);
             }
+            // postavke
+            GameSettings.MusicVolume = Ui.Slider(Ui.Centered(740, 900, 60), "Music", GameSettings.MusicVolume, 0f, 1f);
+            GameSettings.SfxVolume = Ui.Slider(Ui.Centered(810, 900, 60), "Sounds", GameSettings.SfxVolume, 0f, 1f);
+            GameSettings.MouseSensitivity = Ui.Slider(Ui.Centered(880, 900, 60), "Mouse", GameSettings.MouseSensitivity, 0.3f, 2f);
         }
 
         // kraj levela
