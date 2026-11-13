@@ -1,0 +1,3 @@
+# Unityjeva datoteka rasporeda prozora (TutorialInfo/Layout.wlt) nije kod,
+# a GitHub je zbog nastavka .wlt krivo prepoznaje kao Wolfram Language.
+*.wlt linguist-detectable=false
