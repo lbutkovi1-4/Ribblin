@@ -62,6 +62,37 @@ public static class Ui
         return clicked;
     }
 
+    // Klizač: naziv lijevo, traka desno. Vraća novu vrijednost (min – max).
+    public static float Slider(Rect r, string label, float value, float min, float max)
+    {
+        float t = Mathf.InverseLerp(min, max, value);
+        string shown = max <= 1f ? $"{Mathf.RoundToInt(t * 100)} %" : $"{value:0.0}x";   // glasnoća u %, miš kao množitelj
+        Text(new Rect(r.x, r.y, r.width * 0.45f, r.height), $"{label}: {shown}", Label(30, TextAnchor.MiddleLeft));
+
+        var track = new Rect(r.x + r.width * 0.48f, r.y + r.height * 0.5f - 6 * S, r.width * 0.5f, 12 * S);
+        var hit = new Rect(track.x - 10 * S, r.y, track.width + 20 * S, r.height);
+        int id = GUIUtility.GetControlID(FocusType.Passive);
+        var e = Event.current;
+        switch (e.GetTypeForControl(id))
+        {
+            case EventType.MouseDown:
+                if (hit.Contains(e.mousePosition)) { GUIUtility.hotControl = id; t = Mathf.InverseLerp(track.x, track.xMax, e.mousePosition.x); e.Use(); }
+                break;
+            case EventType.MouseDrag:
+                if (GUIUtility.hotControl == id) { t = Mathf.InverseLerp(track.x, track.xMax, e.mousePosition.x); e.Use(); }
+                break;
+            case EventType.MouseUp:
+                if (GUIUtility.hotControl == id) { GUIUtility.hotControl = 0; e.Use(); }
+                break;
+        }
+
+        Box(track, new Color(0, 0, 0, 0.5f));
+        Box(new Rect(track.x, track.y, track.width * t, track.height), new Color(0.35f, 0.85f, 0.4f));
+        float k = 30 * S;
+        Box(new Rect(track.x + track.width * t - k / 2f, track.center.y - k / 2f, k, k), Color.white);
+        return Mathf.Lerp(min, max, t);
+    }
+
     public static Rect Centered(float y, float w, float h)
     {
         return new Rect(Screen.width / 2f - w * S / 2f, y * S, w * S, h * S);
