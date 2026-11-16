@@ -6,6 +6,7 @@ public class Projectile : MonoBehaviour
     public Vector3 velocity;
     public float radius = 0.35f;
     public float life = 4f;
+    public float grow = 0f;     // >0: projektil raste dok leti (plamen)
     float t;
 
     public static Projectile Spawn(Vector3 pos, Vector3 velocity, string mat, float size = 0.6f, PrimitiveType shape = PrimitiveType.Sphere)
@@ -23,6 +24,7 @@ public class Projectile : MonoBehaviour
         if (GameManager.Paused) return;
         t += Time.deltaTime;
         transform.position += velocity * Time.deltaTime;
+        if (grow > 0f) transform.localScale += Vector3.one * grow * Time.deltaTime * (1f - t / life);
         if (t > life) { Destroy(gameObject); return; }
 
         var frog = FrogController.Instance;
