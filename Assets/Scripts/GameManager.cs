@@ -8,7 +8,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public static bool Paused { get; private set; }
     public static bool LevelDone { get; private set; }
-    public static bool InputEnabled => !Paused && !LevelDone;
+    public static bool IsGameOver { get; private set; }
+    public static bool InputEnabled => !Paused && !LevelDone && !IsGameOver;
     public static int Collected => Instance ? Instance.collected : 0;
 
     [Header("Level")]
@@ -28,6 +29,8 @@ public class GameManager : MonoBehaviour
     float messageUntil;
     float titleUntil;
     float completeTimer = -1f;
+    float overlayAt;         // kad se pojavi natpis "Level complete" (nakon što portal usiše žabicu)
+    float gameOverTime;      // koliko dugo traje GAME OVER
     string pendingScene;
     TongueGrapple grapple;
 
@@ -36,6 +39,7 @@ public class GameManager : MonoBehaviour
         Instance = this;
         Paused = false;
         LevelDone = false;
+        IsGameOver = false;
         Time.timeScale = 1f;
         Fx.ClearCache();
         Sfx.Init();
@@ -71,14 +75,33 @@ public class GameManager : MonoBehaviour
         Instance.messageUntil = Time.time + seconds;
     }
 
-    public static void CompleteLevel(string next)
+    // delay = koliko sekundi čekati prije natpisa (portal prvo usiše žabicu)
+    public static void CompleteLevel(string next, float delay = 0f)
     {
-        if (!Instance || LevelDone) return;
+        if (!Instance || LevelDone || IsGameOver) return;
         LevelDone = true;
         GameStats.AddLevel(Instance.timer, Instance.collected, Instance.total);
         Sfx.Play("win", 0.7f);
         Instance.pendingScene = string.IsNullOrEmpty(next) ? "Ribblin_End" : next;
-        Instance.completeTimer = 4f;
+        Instance.completeTimer = 4f + delay;
+        Instance.overlayAt = Time.unscaledTime + delay;
+    }
+
+    // Sva tri srca su izgubljena: GAME OVER, razina kreće ispočetka.
+    public static void GameOver()
+    {
+        if (!Instance || IsGameOver || LevelDone) return;
+        IsGameOver = true;
+        Instance.gameOverTime = 0f;
+        Sfx.Play("hurt", 0.8f);
+        ThirdPersonCamera.Shake(0.5f);
+        Time.timeScale = 0.35f;   // kratko usporenje
+    }
+
+    static void RestartLevel()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     void Update()
@@ -92,6 +115,14 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (IsGameOver)
+        {
+            gameOverTime += Time.unscaledDeltaTime;
+            if (gameOverTime > 1.2f && Time.timeScale > 0f) { Time.timeScale = 0f; LockCursor(false); }
+            if (gameOverTime > 1.6f && kb != null && (kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame)) RestartLevel();
+            return;
+        }
+
         if (kb != null && kb.escapeKey.wasPressedThisFrame) SetPaused(!Paused);
         if (!Paused) timer += Time.deltaTime;
 
@@ -100,7 +131,7 @@ public class GameManager : MonoBehaviour
             LockCursor(true);
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        // Tipke za testiranje: F1 = do vrata bossa, F4 = u arenu, F2 = udari bossa, F3 = preskoči level
+        // Tipke za testiranje: F1 = do vrata bossa, F4 = u arenu, F2 = udari bossa, F3 = preskoči level, F5 = sljedeći checkpoint, F6 = bez štete
         if (kb != null && !Paused)
         {
             if (kb.f1Key.wasPressedThisFrame)
@@ -126,9 +157,31 @@ public class GameManager : MonoBehaviour
                 FrogController.Instance.Respawn();
             }
             if (kb.f3Key.wasPressedThisFrame) CompleteLevel(nextScene);
+            if (kb.f5Key.wasPressedThisFrame) JumpToNextCheckpoint();
+            if (kb.f6Key.wasPressedThisFrame)
+            {
+                PlayerHealth.God = !PlayerHealth.God;
+                ShowMessage(PlayerHealth.God ? "Test mode: no damage" : "Test mode off", 1.5f);
+            }
         }
 #endif
     }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+    // F5: premjesti žabicu na sljedeći checkpoint (redom kako su postavljeni u levelu)
+    int debugCheckpoint = -1;
+    void JumpToNextCheckpoint()
+    {
+        var all = FindObjectsByType<Checkpoint>();
+        System.Array.Sort(all, (a, b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
+        if (all.Length == 0 || !FrogController.Instance) return;
+        debugCheckpoint = (debugCheckpoint + 1) % all.Length;
+        Vector3 p = all[debugCheckpoint].transform.position + Vector3.up * 0.5f;
+        FrogController.Instance.SetCheckpoint(p);
+        FrogController.Instance.Respawn();
+        ShowMessage("Checkpoint " + (debugCheckpoint + 1) + " / " + all.Length, 1.5f);
+    }
+#endif
 
     public void SetPaused(bool value)
     {
@@ -170,7 +223,7 @@ public class GameManager : MonoBehaviour
         Ui.Text(new Rect(28 * s, 116 * s, 500 * s, 50 * s), $"Time: {m:00}:{sec:00}", Ui.Label(28));
 
         // nišan
-        if (!Paused && !LevelDone)
+        if (!Paused && !LevelDone && !IsGameOver)
         {
             if (grapple == null) grapple = FindAnyObjectByType<TongueGrapple>();
             bool target = grapple && grapple.HasTarget;
@@ -200,7 +253,7 @@ public class GameManager : MonoBehaviour
         }
 
         // poruka
-        if (!string.IsNullOrEmpty(message) && Time.time < messageUntil && !Paused)
+        if (!string.IsNullOrEmpty(message) && Time.time < messageUntil && !Paused && !IsGameOver)
         {
             var r = new Rect(Screen.width * 0.1f, Screen.height - 150 * s, Screen.width * 0.8f, 70 * s);
             Ui.Box(r, new Color(0, 0, 0, 0.35f));
@@ -229,8 +282,27 @@ public class GameManager : MonoBehaviour
             GameSettings.MouseSensitivity = Ui.Slider(Ui.Centered(880, 900, 60), "Mouse", GameSettings.MouseSensitivity, 0.3f, 2f);
         }
 
+        // GAME OVER
+        if (IsGameOver)
+        {
+            float a = Mathf.Clamp01(gameOverTime / 0.8f);
+            Ui.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0.25f, 0.02f, 0.04f, 0.7f * a));
+            var old = GUI.color;
+            GUI.color = new Color(1, 1, 1, a);
+            Ui.Text(Ui.Centered(260, 1200, 140), "GAME OVER", Ui.Label(130, TextAnchor.MiddleCenter), new Color(1f, 0.3f, 0.3f));
+            Ui.Text(Ui.Centered(410, 1200, 60), "Ribblin lost all three hearts.", Ui.Label(40, TextAnchor.MiddleCenter));
+            GUI.color = old;
+            if (gameOverTime > 1.6f)
+            {
+                if (Ui.Button(Ui.Centered(540, 460, 85), "Try again")) RestartLevel();
+                if (Ui.Button(Ui.Centered(645, 460, 85), "Main menu")) { Time.timeScale = 1f; SceneManager.LoadScene(menuScene); }
+                Ui.Text(Ui.Centered(760, 1200, 50), "The level starts again from the beginning.", Ui.Label(30, TextAnchor.MiddleCenter), new Color(1f, 1f, 1f, 0.8f));
+            }
+            return;
+        }
+
         // kraj levela
-        if (LevelDone)
+        if (LevelDone && Time.unscaledTime >= overlayAt)
         {
             Ui.Box(new Rect(0, 0, Screen.width, Screen.height), new Color(0.1f, 0.3f, 0.15f, 0.55f));
             Ui.Text(Ui.Centered(300, 1200, 110), $"{levelTitle} complete!", Ui.Label(84, TextAnchor.MiddleCenter), new Color(1f, 0.9f, 0.4f));
