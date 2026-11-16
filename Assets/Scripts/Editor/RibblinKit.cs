@@ -62,7 +62,6 @@ public static class Kit
         { "Trunk", new Color(0.78f, 0.62f, 0.42f) }, { "TrunkDark", new Color(0.6f, 0.45f, 0.3f) },
         { "Water", new Color(0.2f, 0.85f, 0.85f) },
         { "Crab", new Color(0.95f, 0.35f, 0.25f) }, { "CrabBelly", new Color(1f, 0.75f, 0.55f) }, { "CrabDark", new Color(0.75f, 0.2f, 0.15f) },
-        { "Toad", new Color(0.35f, 0.5f, 0.25f) }, { "ToadBelly", new Color(0.85f, 0.8f, 0.5f) },
         { "Golem", new Color(0.22f, 0.2f, 0.22f) }, { "GolemDark", new Color(0.14f, 0.12f, 0.13f) },
         { "Storm", new Color(0.3f, 0.35f, 0.55f) }, { "StormLight", new Color(0.65f, 0.7f, 0.85f) }, { "StormDark", new Color(0.2f, 0.22f, 0.38f) },
         { "SlimeGreen", new Color(0.5f, 0.95f, 0.4f) }, { "SlimePurple", new Color(0.7f, 0.4f, 0.95f) },
@@ -80,10 +79,14 @@ public static class Kit
         { "FlagOn", new Color(0.3f, 1f, 0.4f) },
         { "Fish", new Color(1f, 0.55f, 0.2f) }, { "FishBlue", new Color(0.3f, 0.6f, 1f) },
         { "Snake", new Color(0.35f, 0.6f, 0.2f) }, { "SnakeStripe", new Color(0.85f, 0.75f, 0.25f) },
+        { "SerpentScale", new Color(0.16f, 0.3f, 0.14f) }, { "SerpentDark", new Color(0.07f, 0.13f, 0.08f) },
+        { "SerpentBand", new Color(0.55f, 0.1f, 0.08f) }, { "SerpentBelly", new Color(0.7f, 0.64f, 0.38f) },
+        { "EvilEye", new Color(1f, 0.2f, 0.05f) }, { "Venom", new Color(0.5f, 1f, 0.15f) },
         { "Flame", new Color(1f, 0.45f, 0.08f) }, { "FlameCore", new Color(1f, 0.85f, 0.3f) },
         { "Bird", new Color(0.95f, 0.95f, 0.98f) },
+        { "Poop", new Color(0.96f, 0.96f, 0.9f) }, { "PoopDark", new Color(0.45f, 0.45f, 0.42f) },
         { "DragonGreen", new Color(0.25f, 0.65f, 0.4f) }, { "DragonPurple", new Color(0.5f, 0.3f, 0.75f) },
-        { "DragonTeal", new Color(0.15f, 0.6f, 0.7f) }, { "DragonBelly", new Color(0.95f, 0.85f, 0.55f) },
+        { "DragonTeal", new Color(0.15f, 0.6f, 0.7f) }, { "DragonRed", new Color(0.85f, 0.25f, 0.15f) }, { "DragonBelly", new Color(0.95f, 0.85f, 0.55f) },
         { "DragonWing", new Color(0.2f, 0.25f, 0.35f) }, { "Horn", new Color(0.95f, 0.92f, 0.85f) },
         { "Smoke", new Color(0.32f, 0.3f, 0.34f) },
         { "Feather", new Color(0.85f, 0.92f, 1f) }, { "BeeYellow", new Color(1f, 0.82f, 0.15f) },
@@ -101,13 +104,14 @@ public static class Kit
     static readonly Dictionary<string, float> emissive = new Dictionary<string, float>
     {
         { "Lightning", 2.5f }, { "Lava", 2f }, { "LavaGlow", 3f }, { "LavaPlane", 1.6f }, { "Shock", 1.5f }, { "Sprite", 2f }, { "Flame", 2.5f }, { "Ember", 4f }, { "FlameCore", 3f },
-        { "CrystalGlow", 3f }, { "PortalCore", 2f }, { "Firefly", 3f }, { "Warning", 1.2f }, { "Tongue", 0.3f },
+        { "CrystalGlow", 3f }, { "PortalCore", 2f }, { "Firefly", 3f }, { "Warning", 1.2f }, { "Tongue", 0.3f }, { "EvilEye", 3f }, { "Venom", 1.5f },
     };
 
     public static readonly string[] FxKeys =
         { "Tongue", "Dust", "Warning", "WarningDark", "Lightning", "Lava", "Shock", "CrystalGlow", "CrystalDim", "PortalCore", "FlagOn",
           "Feather", "Gold", "Sprite", "LeafDark", "SlimePurple", "SlimeOrange", "SlimeBlue", "SlimeGreen", "Basalt",
-          "PlantHead", "PlantPurple", "BeeYellow", "Mosquito", "Bat", "Cloud" };
+          "PlantHead", "PlantPurple", "BeeYellow", "Mosquito", "Bat", "Cloud", "Venom",
+          "Flame", "FlameCore", "DragonRed", "Poop", "PoopDark" };
 
     // ---------- scena ----------
 
@@ -287,10 +291,76 @@ public static class Kit
     public static GameObject Box(string name, Vector3 center, Vector3 size, string mat, float rotY = 0f)
         => P(PrimitiveType.Cube, name, null, center, size, mat, true, new Vector3(0, rotY, 0));
 
-    public static void WaterPlane(float y, string mat = "Water")
+    public static void WaterPlane(float y, string mat = "Water", bool waves = false)
     {
+        if (waves)
+        {
+            // more s valovima (mreža se pravi kad igra krene, vidi WaveWater.cs)
+            var go = new GameObject("Water_Waves");
+            go.transform.SetParent(Root, false);
+            go.transform.position = new Vector3(0, y, 0);
+            go.AddComponent<MeshFilter>();
+            var mr = go.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = Mat(mat);
+            mr.shadowCastingMode = ShadowCastingMode.Off;
+            go.AddComponent<WaveWater>();
+            // ravna voda ispod, da se u editoru vidi more i kad igra ne radi
+            var under = P(PrimitiveType.Plane, "Water", null, new Vector3(0, y - 0.45f, 0), new Vector3(100, 1, 100), mat, false);
+            under.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            return;
+        }
         var w = P(PrimitiveType.Plane, "Water", null, new Vector3(0, y, 0), new Vector3(100, 1, 100), mat, false);
         w.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+    }
+
+    // Pjena valova koji udaraju u obalu: niz plosnatih bijelih mrlja koji putuje prema obali.
+    static void FoamStrip(Vector3 shore, Vector3 outward, float length, float period, float phase)
+    {
+        var g = Group("Foam", shore);
+        g.rotation = Quaternion.LookRotation(outward);
+        int n = Mathf.Max(3, Mathf.RoundToInt(length / 0.9f));
+        for (int i = 0; i < n; i++)
+        {
+            float x = (i - (n - 1) / 2f) * 0.9f;
+            float z = Mathf.Sin(i * 0.9f) * 0.25f;
+            var b = V(g, PrimitiveType.Sphere, "Foam", new Vector3(x, 0, z), new Vector3(Random.Range(1.0f, 1.5f), 0.06f, Random.Range(0.35f, 0.6f)), "Cloud");
+            b.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+        }
+        var sw = g.gameObject.AddComponent<ShoreWave>();
+        sw.shorePoint = shore;
+        sw.outward = outward;
+        sw.distance = Random.Range(6f, 10f);
+        sw.period = period;
+        sw.phase = phase;
+    }
+
+    // valovi oko četvrtastog otoka (pola stranice = half)
+    public static void ShoreFoamSquare(Vector3 center, float half, float y)
+    {
+        Vector3[] dirs = { Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
+        foreach (var d in dirs)
+        {
+            Vector3 side = Vector3.Cross(Vector3.up, d);
+            for (int i = -2; i <= 2; i++)
+            {
+                Vector3 p = center + d * (half + 0.6f) + side * (i * half * 0.38f);
+                p.y = y;
+                FoamStrip(p, d, Random.Range(7f, 11f), Random.Range(4.5f, 6f), Random.value);
+            }
+        }
+    }
+
+    // valovi oko okruglog otoka
+    public static void ShoreFoamRound(Vector3 center, float radius, float y, int count = 7)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            float a = i / (float)count * Mathf.PI * 2f + Random.Range(-0.2f, 0.2f);
+            Vector3 d = new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a));
+            Vector3 p = center + d * (radius + 0.5f);
+            p.y = y;
+            FoamStrip(p, d, radius * 0.75f, Random.Range(4.5f, 6f), Random.value);
+        }
     }
 
     // ---------- priroda ----------
@@ -562,6 +632,7 @@ public static class Kit
         V(g, PrimitiveType.Sphere, "End", new Vector3(-length / 2f, 0, 0), Vector3.one * 0.7f, "Yellow");
     }
 
+    // Portal: zlatni prsten s vrtlogom u sredini, dva stupa sa svjetlima i postolje.
     public static GameObject Portal(Vector3 pos, string next, Vector3? faceTowards = null)
     {
         var root = new GameObject("Portal");
@@ -574,16 +645,55 @@ public static class Kit
         }
         var p = root.AddComponent<Portal>();
         p.nextScene = next;
-        var ring = Group("Ring", pos + Vector3.up * 2.2f, root.transform);
-        for (int i = 0; i < 14; i++)
+        Vector3 c = new Vector3(0, 2.6f, 0);   // sredina vrtloga (lokalno)
+
+        // postolje u dvije stepenice
+        V(root.transform, PrimitiveType.Cylinder, "Base", new Vector3(0, 0.1f, 0), new Vector3(4.6f, 0.1f, 4.6f), "Marble");
+        V(root.transform, PrimitiveType.Cylinder, "Base2", new Vector3(0, 0.28f, 0), new Vector3(3.6f, 0.08f, 3.6f), "Gold");
+        // dva stupa sa svjetlećim kuglama
+        foreach (float sx in new[] { -1f, 1f })
         {
-            float a = i / 14f * Mathf.PI * 2f;
-            V(ring, PrimitiveType.Cube, "Stone", new Vector3(Mathf.Cos(a) * 1.9f, Mathf.Sin(a) * 1.9f, 0), Vector3.one * 0.5f, "Gold",
+            V(root.transform, PrimitiveType.Cylinder, "Pillar", new Vector3(sx * 2.9f, 2f, 0), new Vector3(0.5f, 2f, 0.5f), "Marble");
+            V(root.transform, PrimitiveType.Cube, "PillarCap", new Vector3(sx * 2.9f, 4.1f, 0), new Vector3(0.8f, 0.25f, 0.8f), "Gold");
+            V(root.transform, PrimitiveType.Sphere, "PillarOrb", new Vector3(sx * 2.9f, 4.55f, 0), Vector3.one * 0.6f, "CrystalGlow");
+        }
+
+        // vanjski zlatni prsten
+        var ring = Group("Ring", Vector3.zero, root.transform);
+        ring.localPosition = c; ring.localRotation = Quaternion.identity;
+        for (int i = 0; i < 18; i++)
+        {
+            float a = i / 18f * Mathf.PI * 2f;
+            V(ring, PrimitiveType.Cube, "Stone", new Vector3(Mathf.Cos(a) * 2.2f, Mathf.Sin(a) * 2.2f, 0), new Vector3(0.55f, 0.75f, 0.55f), i % 3 == 0 ? "CrystalGlow" : "Gold",
                 new Vector3(0, 0, a * Mathf.Rad2Deg));
         }
-        V(root.transform, PrimitiveType.Sphere, "Core", new Vector3(0, 2.2f, 0), new Vector3(3.2f, 3.4f, 0.3f), "PortalCore");
-        V(root.transform, PrimitiveType.Cylinder, "Base", new Vector3(0, 0.05f, 0), new Vector3(3f, 0.05f, 3f), "Gold");
+        // unutarnji svjetleći prsten (vrti se suprotno)
+        var inner = Group("RingInner", Vector3.zero, root.transform);
+        inner.localPosition = c; inner.localRotation = Quaternion.identity;
+        for (int i = 0; i < 12; i++)
+        {
+            float a = i / 12f * Mathf.PI * 2f;
+            V(inner, PrimitiveType.Cube, "Glow", new Vector3(Mathf.Cos(a) * 1.75f, Mathf.Sin(a) * 1.75f, 0.1f), new Vector3(0.22f, 0.45f, 0.15f), "PortalCore",
+                new Vector3(0, 0, a * Mathf.Rad2Deg));
+        }
+        // vrtlog: pozadina, četiri spiralna kraka i svijetla sredina
+        var core = V(root.transform, PrimitiveType.Sphere, "Core", c, new Vector3(3.9f, 3.9f, 0.25f), "PortalCore");
+        var swirl = Group("Swirl", Vector3.zero, root.transform);
+        swirl.localPosition = c + new Vector3(0, 0, 0.16f); swirl.localRotation = Quaternion.identity;
+        for (int arm = 0; arm < 4; arm++)
+            for (int j = 0; j < 8; j++)
+            {
+                float a = arm * Mathf.PI * 0.5f + j * 0.42f;
+                float r = 1.6f - j * 0.19f;
+                float sz = Mathf.Lerp(0.55f, 0.18f, j / 7f);
+                V(swirl, PrimitiveType.Sphere, "Swirl", new Vector3(Mathf.Cos(a) * r, Mathf.Sin(a) * r, 0), new Vector3(sz, sz, 0.08f), j % 2 == 0 ? "CrystalGlow" : "Cloud");
+            }
+        V(root.transform, PrimitiveType.Sphere, "Eye", c + new Vector3(0, 0, 0.2f), new Vector3(0.9f, 0.9f, 0.1f), "Lightning");
+
         p.ring = ring;
+        p.ringInner = inner;
+        p.swirl = swirl;
+        p.core = core.transform;
         return root;
     }
 
@@ -859,6 +969,25 @@ public static class Kit
         f.range = SlimeChase + 3f;
     }
 
+    // Mali zmaj koji bljuje vatru (vulkan).
+    public static void FireDragon(Vector3 pos)
+    {
+        var g = Group("FireDragon", pos);
+        var m = DragonModel(g, "DragonRed", false, out var wl, out var wr);
+        m.localScale = Vector3.one * 0.5f;
+        m.localPosition = new Vector3(0, -0.35f, -0.3f);
+        V(m, PrimitiveType.Sphere, "MouthGlow", new Vector3(0, 0.8f, 2.3f), Vector3.one * 0.3f, "LavaGlow");
+        var mouth = Group("Mouth", pos, m);
+        mouth.localPosition = new Vector3(0, 0.85f, 2.5f);
+        var d = g.gameObject.AddComponent<FireDragon>();
+        d.model = m;
+        d.wingL = wl;
+        d.wingR = wr;
+        d.mouth = mouth;
+        d.debrisMat = "DragonRed";
+        d.range = SlimeChase + 1f;
+    }
+
     // kind: "plant" (L1), "swamp" (L2), "lava" (L3), "cloud" (L4)
     public static void Spitter(Vector3 pos, string kind)
     {
@@ -1097,7 +1226,7 @@ public static class Kit
             case "L1": sat = 18f; break;                                   // sunčani otok – živahne boje
             case "L2": sat = 4f; vig = 0.32f; con = 14f; break;             // mutna močvara – tamniji rubovi
             case "L3": bloom = 0.9f; threshold = 0.9f; con = 16f; break;   // vulkan – lava svijetli
-            case "L4": temp = 12f; bloom = 0.5f; break;                    // zlatni zalazak – toplije
+            case "L4": temp = -8f; bloom = 0.4f; sat = 6f; break;           // nježno plavo nebo – hladniji, mekši tonovi
             case "End": temp = 10f; break;
         }
 

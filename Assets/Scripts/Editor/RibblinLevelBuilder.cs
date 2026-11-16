@@ -76,7 +76,14 @@ public static class RibblinLevelBuilder
         var t = new Theme { id = "L1" };
         var scene = Kit.NewScene(t);
         Kit.SetDifficulty(3.0f, 9f, false);     // Level 1
-        Kit.WaterPlane(-0.3f);
+        Kit.WaterPlane(-0.45f, "Water", true);   // more s valovima
+        // pjena valova uz obalu glavnog otoka i manjih otoka
+        Kit.ShoreFoamSquare(Vector3.zero, 30f, -0.1f);
+        Kit.ShoreFoamRound(new Vector3(0, 0, 46), 7f, -0.1f);
+        Kit.ShoreFoamRound(new Vector3(-47, 0, -6), 6f, -0.1f);
+        Kit.ShoreFoamRound(new Vector3(0, 0, -56), 5f, -0.1f, 6);
+        Kit.ShoreFoamRound(new Vector3(50, 0, 0), 5f, -0.1f, 6);
+        Kit.ShoreFoamRound(new Vector3(80, 0, 0), 15f, -0.1f, 12);
 
         // glavni otok
         Kit.Ground(new Vector3(0, 0.3f, 0), new Vector3(60, 4, 60), "Sand", "SandDark");
@@ -297,7 +304,7 @@ public static class RibblinLevelBuilder
     }
 
     // =====================================================================
-    // LEVEL 2 – MOČVARA   (boss: King Croakus)
+    // LEVEL 2 – MOČVARA   (boss: Venomaw, the Swamp Serpent)
     // =====================================================================
     static void BuildLevel2()
     {
@@ -488,10 +495,10 @@ public static class RibblinLevelBuilder
         }
         Kit.DeadTree(arena + new Vector3(12, 0, 8), 7f);
         var portal = Kit.Portal(arena + new Vector3(0, 0, 11), "Level3_Vulkan", arena);
-        BuildToad(arena + new Vector3(0, 0, 4), arena, portal);
+        BuildSerpent(arena + new Vector3(0, 0, 4), arena, portal);
 
         // zmije uz rubove otoka
-        foreach (var sp in new[] { new Vector3(-5, 1, -4), new Vector3(5, 1, 33), new Vector3(-4, 1, 64), new Vector3(5, 1, 96), new Vector3(-5, 1, 140), new Vector3(12, 1, 176), new Vector3(-1, 1, 222), new Vector3(15, 1, 250), new Vector3(-5, 1, 262) })
+        foreach (var sp in new[] { new Vector3(-5, 1, -4), new Vector3(5, 1, 33), new Vector3(-4, 1, 64), new Vector3(5, 1, 96), new Vector3(-5, 1, 140), new Vector3(12, 1, 176), new Vector3(-1, 1, 222) })   // u areni nema malih zmija – tamo je boss
             Kit.Snake(sp, 2.5f);
 
         // krijesnice i trska
@@ -504,62 +511,79 @@ public static class RibblinLevelBuilder
         Save(scene, "Level2_Mocvara");
     }
 
-    static void BuildToad(Vector3 pos, Vector3 arena, GameObject portal)
+    static void BuildSerpent(Vector3 pos, Vector3 arena, GameObject portal)
     {
-        var root = Kit.Group("Boss_ToadKing", pos);
-        root.rotation = Quaternion.Euler(0, 180, 0);
-        var model = Kit.Group("Model", pos, root);
-        model.localRotation = Quaternion.identity;
-        Kit.V(model, PrimitiveType.Sphere, "Body", new Vector3(0, 1.6f, 0), new Vector3(4.4f, 3.2f, 4f), "Toad");
-        Kit.V(model, PrimitiveType.Sphere, "Belly", new Vector3(0, 1.3f, 0.9f), new Vector3(3.6f, 2.4f, 2.8f), "ToadBelly");
+        var root = Kit.Group("Boss_Serpent", pos);
+        root.rotation = Quaternion.Euler(0, 180, 0);   // glava gleda prema ulazu u arenu
+
+        // glava kobre
+        var head = Kit.Group("Head", pos, root);
+        head.localRotation = Quaternion.identity;
+        Kit.V(head, PrimitiveType.Sphere, "Skull", new Vector3(0, 0.9f, 0.2f), new Vector3(2.0f, 1.3f, 2.6f), "SerpentScale");
+        Kit.V(head, PrimitiveType.Sphere, "Jaw", new Vector3(0, 0.55f, 0.5f), new Vector3(1.7f, 0.7f, 2.2f), "SerpentBelly");
+        Kit.V(head, PrimitiveType.Sphere, "Hood", new Vector3(0, 1.25f, -0.55f), new Vector3(2.4f, 1.9f, 0.35f), "SerpentScale", new Vector3(-15, 0, 0));
         foreach (float sx in new[] { -1f, 1f })
         {
-            Kit.V(model, PrimitiveType.Sphere, "Eye", new Vector3(sx * 1.1f, 3.0f, 1.2f), Vector3.one * 1.2f, "Toad");
-            Kit.V(model, PrimitiveType.Sphere, "EyeWhite", new Vector3(sx * 1.1f, 3.15f, 1.65f), Vector3.one * 0.75f, "Yellow");
-            Kit.V(model, PrimitiveType.Sphere, "Pupil", new Vector3(sx * 1.1f, 3.2f, 1.98f), new Vector3(0.35f, 0.5f, 0.2f), "Black");
-            Kit.V(model, PrimitiveType.Sphere, "Foot", new Vector3(sx * 1.8f, 0.25f, 1.4f), new Vector3(1.4f, 0.5f, 1.8f), "Toad");
-            Kit.V(model, PrimitiveType.Sphere, "Wart", new Vector3(sx * 1.6f, 2.2f, -0.6f), Vector3.one * 0.5f, "LeafDark");
+            Kit.V(head, PrimitiveType.Sphere, "HoodSpot", new Vector3(sx * 0.6f, 1.45f, -0.42f), new Vector3(0.5f, 0.5f, 0.15f), "SerpentBand", new Vector3(-15, 0, 0));
+            Kit.V(head, PrimitiveType.Sphere, "Eye", new Vector3(sx * 0.6f, 1.25f, 1.0f), new Vector3(0.42f, 0.3f, 0.42f), "EvilEye");
+            Kit.V(head, PrimitiveType.Cube, "Slit", new Vector3(sx * 0.6f, 1.26f, 1.2f), new Vector3(0.06f, 0.24f, 0.06f), "Black");
+            Kit.V(head, PrimitiveType.Cube, "Brow", new Vector3(sx * 0.6f, 1.5f, 0.95f), new Vector3(0.6f, 0.12f, 0.3f), "SerpentDark", new Vector3(0, 0, sx * -20f));
+            Kit.V(head, PrimitiveType.Cube, "Fang", new Vector3(sx * 0.45f, 0.3f, 1.45f), new Vector3(0.12f, 0.5f, 0.12f), "White", new Vector3(15, 0, 0));
+            Kit.V(head, PrimitiveType.Cube, "TongueFork", new Vector3(sx * 0.09f, 0.5f, 2.2f), new Vector3(0.06f, 0.04f, 0.32f), "Red", new Vector3(0, sx * 25f, 0));
         }
-        Kit.V(model, PrimitiveType.Cube, "Mouth", new Vector3(0, 1.95f, 1.95f), new Vector3(2.6f, 0.1f, 0.2f), "Black");
-        Kit.V(model, PrimitiveType.Cylinder, "Crown", new Vector3(0, 3.35f, -0.1f), new Vector3(1.6f, 0.25f, 1.6f), "Gold");
+        Kit.V(head, PrimitiveType.Cube, "Tongue", new Vector3(0, 0.5f, 1.75f), new Vector3(0.1f, 0.05f, 0.7f), "Red");
+
+        // zvjezdice kad zabije glavu u tlo
+        var stun = Kit.Group("StunStars", pos, head);
+        stun.localPosition = new Vector3(0, 2.8f, 0.2f);
         for (int i = 0; i < 5; i++)
         {
             float a = i / 5f * Mathf.PI * 2f;
-            Kit.V(model, PrimitiveType.Cube, "CrownTip", new Vector3(Mathf.Cos(a) * 0.65f, 3.8f, Mathf.Sin(a) * 0.65f - 0.1f), new Vector3(0.25f, 0.55f, 0.25f), "Gold", new Vector3(0, a * Mathf.Rad2Deg, 0));
+            Kit.V(stun, PrimitiveType.Sphere, "Star", new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * 1.0f, Vector3.one * 0.32f, "Yellow");
         }
-        Kit.V(model, PrimitiveType.Sphere, "Gem", new Vector3(0, 3.4f, 0.72f), Vector3.one * 0.35f, "Red");
+        stun.gameObject.SetActive(false);
 
-        var tired = Kit.Group("Tired", pos, root);
-        int k = 0;
-        foreach (var o in new[] { new Vector3(1.5f, 4.6f, 0), new Vector3(2.1f, 5.3f, 0), new Vector3(2.8f, 6.1f, 0) })
+        // točka za jezik na glavi
+        var hp = Kit.Group("HeadPoint", pos, head);
+        hp.localPosition = new Vector3(0, 2.2f, 0.3f);
+        var hvis = Kit.Group("Visual", pos, hp);
+        hvis.localPosition = Vector3.zero;
+        Kit.V(hvis, PrimitiveType.Sphere, "Orb", Vector3.zero, Vector3.one * 0.6f, "CrystalGlow");
+        var headGp = hp.gameObject.AddComponent<GrapplePoint>();
+        headGp.visual = hvis;
+        headGp.bob = false;
+        headGp.targetable = false;
+
+        // tijelo: sklupčano u spiralu iza glave
+        var segs = new List<Transform>();
+        int n = 14;
+        for (int i = 0; i < n; i++)
         {
-            var z = Kit.V(tired, PrimitiveType.Cube, "Z", o, Vector3.one * (0.3f + k++ * 0.12f), "White");
-            z.AddComponent<Bobber>().amplitude = 0.2f;
+            float t = i / (n - 1f);
+            float sz = Mathf.Lerp(1.6f, 0.45f, t);
+            float ang = Mathf.PI * 0.5f + i * 0.55f;
+            float rad = 1.6f + i * 0.17f;
+            Vector3 p = pos + new Vector3(Mathf.Cos(ang) * rad, 0, Mathf.Sin(ang) * rad);
+            var seg = Kit.Group("Body", p, root);
+            Kit.V(seg, PrimitiveType.Sphere, "Scale", new Vector3(0, sz * 0.5f, 0), new Vector3(sz, sz * 0.85f, sz * 1.25f), i % 3 == 2 ? "SerpentBand" : "SerpentScale");
+            Kit.V(seg, PrimitiveType.Sphere, "Belly", new Vector3(0, sz * 0.3f, 0), new Vector3(sz * 0.8f, sz * 0.5f, sz * 1.1f), "SerpentBelly");
+            if (i < 7)
+                Kit.V(seg, PrimitiveType.Cube, "Spine", new Vector3(0, sz * 0.95f, 0), new Vector3(0.12f, sz * 0.4f, 0.25f), "SerpentDark", new Vector3(-25, 0, 0));
+            segs.Add(seg);
         }
-        tired.gameObject.SetActive(false);
 
-        model.localScale = Vector3.one * 0.8f;
-        var crown = Kit.Group("CrownPoint", pos, model);
-        crown.localPosition = new Vector3(0, 4.4f, -0.1f);
-        var cvis = Kit.Group("Visual", pos, crown);
-        cvis.localPosition = Vector3.zero;
-        Kit.V(cvis, PrimitiveType.Sphere, "Orb", Vector3.zero, Vector3.one * 0.7f, "CrystalGlow");
-        var crownGp = crown.gameObject.AddComponent<GrapplePoint>();
-        crownGp.visual = cvis;
-        crownGp.bob = false;
-        crownGp.targetable = false;
-
-        var boss = root.gameObject.AddComponent<ToadKingBoss>();
-        boss.roarSound = "toad_roar"; boss.attackSound = "toad_attack"; boss.hurtSound = "toad_hurt";
-        boss.crownPoint = crownGp;
-        boss.bossName = "King Croakus";
+        var boss = root.gameObject.AddComponent<SnakeBoss>();
+        boss.roarSound = "snake_roar"; boss.attackSound = "snake_attack"; boss.hurtSound = "snake_hurt";
+        boss.bossName = "Venomaw, the Swamp Serpent";
         boss.maxHealth = 3;
         boss.arenaCenter = arena;
         boss.arenaRadius = 15f;
         boss.portal = portal;
-        boss.model = model;
-        boss.tiredFx = tired.gameObject;
-        boss.hint = "Jump over the shockwaves! When the King gets tired, jump on his head or grab his crown with your tongue.";
+        boss.head = head;
+        boss.segments = segs.ToArray();
+        boss.headPoint = headGp;
+        boss.stunFx = stun.gameObject;
+        boss.hint = "Jump over the venom wave from her tail! When Venomaw strikes and misses, her head gets stuck – jump on it or grab it with your tongue.";
     }
 
     // =====================================================================
@@ -620,7 +644,7 @@ public static class RibblinLevelBuilder
         // S4 – vrtuljak
         Kit.Ground(new Vector3(0, 6.5f, 72), new Vector3(14, 7.5f, 12));
         Kit.SpinnerBar(new Vector3(0, 6.5f, 72), 11f, 85f);
-        Kit.Flyer(new Vector3(-3, 9.5f, 40), "bat");
+        Kit.FireDragon(new Vector3(-3, 9.5f, 40));
         Kit.Spitter(new Vector3(5.5f, 6.5f, 77), "lava");
         Kit.Slime(new Vector3(-4, 6.5f, 75), 2f, "SlimeOrange");
         Kit.Slime(new Vector3(4.5f, 6.5f, 69), 2f, "SlimeOrange");
@@ -677,8 +701,8 @@ public static class RibblinLevelBuilder
         Kit.Checkpoint(new Vector3(-4, 16, 147.5f));
         Kit.Spitter(new Vector3(-5, 16, 156), "lava");
         Kit.Spitter(new Vector3(5, 16, 155), "lava");
-        Kit.Flyer(new Vector3(0, 19f, 151), "bat");
-        Kit.Flyer(new Vector3(4, 19f, 148), "bat");
+        Kit.FireDragon(new Vector3(0, 19f, 151));
+        Kit.FireDragon(new Vector3(4, 19f, 148));
         Kit.PopSpikes(new Vector3(0, 16, 150.5f), new Vector3(6, 0, 1.5f), 2.5f, 0f);
         Kit.PopSpikes(new Vector3(0, 16, 154f), new Vector3(6, 0, 1.5f), 2.5f, 1.25f);
         Kit.Slime(new Vector3(-3, 16, 152), 2.5f, "SlimeOrange", 1f, true, true);
@@ -695,7 +719,7 @@ public static class RibblinLevelBuilder
         Kit.Grapple(new Vector3(0, 33.5f, 163.5f));
         Kit.Fruit(new Vector3(-7, 23.7f, 167f));
         Kit.Checkpoint(new Vector3(-3, 30, 167));
-        Kit.Flyer(new Vector3(2, 33f, 171), "bat");
+        Kit.FireDragon(new Vector3(2, 33f, 171));
         Kit.Slime(new Vector3(1, 30, 172), 2.5f, "SlimeOrange", 1f, true, true);
         Kit.Fruit(new Vector3(3.5f, 31, 173.5f));
         Kit.Fruit(new Vector3(-3.5f, 31, 173.5f));
@@ -713,7 +737,7 @@ public static class RibblinLevelBuilder
         Kit.Ground(new Vector3(0, 30, 209), new Vector3(12, 31, 12));
         Kit.Checkpoint(new Vector3(-4, 30, 205), true);
         Kit.Spitter(new Vector3(4, 30, 212), "lava");
-        Kit.Flyer(new Vector3(-2, 33, 211), "bat");
+        Kit.FireDragon(new Vector3(-2, 33, 211));
         Kit.Fruit(new Vector3(-4.5f, 31, 213));
 
         int required = Mathf.RoundToInt(Kit.FruitCount * 0.85f);   // Level 3: 85 % voća
@@ -822,32 +846,41 @@ public static class RibblinLevelBuilder
     // =====================================================================
     static void BuildLevel4()
     {
-        // Nebesko kraljevstvo u zlatnom zalazu sunca: mramor, zlato i baloni – sasvim drukčije od otoka
+        // Nebesko kraljevstvo u nježnim plavim tonovima: svijetloplavo nebo, bijeli mramor i oblaci
         var t = new Theme
         {
             id = "L4",
-            sky = new Color(0.98f, 0.8f, 0.52f), fog = new Color(1f, 0.9f, 0.72f), fogStart = 80f, fogEnd = 360f,
-            ambSky = new Color(1f, 0.92f, 0.8f), ambEq = new Color(0.92f, 0.86f, 0.75f), ambGround = new Color(0.6f, 0.55f, 0.5f),
-            sun = new Color(1f, 0.85f, 0.65f), sunIntensity = 1.35f, sunEuler = new Vector3(28, -50, 0),
+            sky = new Color(0.62f, 0.8f, 0.98f), fog = new Color(0.78f, 0.88f, 1f), fogStart = 90f, fogEnd = 420f,
+            ambSky = new Color(0.82f, 0.9f, 1f), ambEq = new Color(0.78f, 0.84f, 0.95f), ambGround = new Color(0.55f, 0.6f, 0.72f),
+            sun = new Color(1f, 0.98f, 0.94f), sunIntensity = 1.3f, sunEuler = new Vector3(48, -40, 0),
         };
-        // zlatni zalazak sunca: krem mramor, zlato i bijeli oblaci (bez roza i dugih boja)
-        t.colors["Top"] = new Color(0.93f, 0.88f, 0.76f);     // krem kamen
-        t.colors["Side"] = new Color(0.82f, 0.78f, 0.72f);    // mramor
-        t.colors["SideDark"] = new Color(0.62f, 0.58f, 0.54f);
-        t.colors["Rock"] = new Color(0.95f, 0.93f, 0.9f);
+        // nježne plave boje: bijelo-plavi mramor, svijetloplave strane, pastelni baloni
+        t.colors["Top"] = new Color(0.92f, 0.95f, 1f);        // bijeli mramor s plavim tonom
+        t.colors["Side"] = new Color(0.72f, 0.82f, 0.95f);    // svijetloplava
+        t.colors["SideDark"] = new Color(0.55f, 0.66f, 0.86f);
+        t.colors["Rock"] = new Color(0.9f, 0.94f, 1f);
+        t.colors["Marble"] = new Color(0.94f, 0.96f, 1f);
+        t.colors["Gold"] = new Color(0.55f, 0.75f, 1f);       // rubovi i kape stupova u plavoj umjesto zlatne
         t.colors["Cloud"] = new Color(1f, 1f, 1f);
-        t.colors["Balloon1"] = new Color(0.85f, 0.25f, 0.2f);
+        t.colors["Roof"] = new Color(0.45f, 0.62f, 0.92f);
+        t.colors["Balloon1"] = new Color(0.55f, 0.75f, 1f);
+        t.colors["Balloon2"] = new Color(0.75f, 0.88f, 1f);
+        t.colors["Balloon3"] = new Color(0.62f, 0.68f, 0.98f);
         var scene = Kit.NewScene(t);
         Kit.SetDifficulty(4.5f, 14f, true);     // Level 4: najbrži i najagresivniji
 
         // oblaci i ptice samo sa strane
-        for (int i = 0; i < 70; i++)
+        for (int i = 0; i < 90; i++)
         {
             float x = Random.Range(35f, 95f) * (Random.value > 0.5f ? 1f : -1f);
-            Kit.Cloud(new Vector3(x, Random.Range(-6f, 30f), Random.Range(-40f, 300f)), Random.Range(2.5f, 5f));
+            Kit.Cloud(new Vector3(x, Random.Range(-6f, 30f), Random.Range(-40f, 420f)), Random.Range(2.5f, 5f));
         }
         for (int i = 0; i < 10; i++)
             Kit.Bird(new Vector3(0, 0, 130), Random.Range(45f, 70f), Random.Range(20f, 40f), Random.Range(0.08f, 0.18f) * (i % 2 == 0 ? 1f : -1f));
+
+        // ptice kruže nad "ptičjom stazom" (S11)
+        for (int i = 0; i < 8; i++)
+            Kit.Bird(new Vector3(0, 24, 226), Random.Range(4f, 9f), Random.Range(13f, 17f), Random.Range(0.35f, 0.6f) * (i % 2 == 0 ? 1f : -1f));
 
         // S0 – početni otok s hramom
         Kit.FloatIsland(new Vector3(0, 10, 0), 8f);
@@ -944,19 +977,81 @@ public static class RibblinLevelBuilder
         Kit.Fruit(new Vector3(0, 25, 175));
         Kit.Fruit(new Vector3(0, 25, 183));
 
-        // S10 – ispred bossa
+        // S10 – otok s hramom (odmor prije ptičje staze)
         Kit.FloatIsland(new Vector3(0, 24, 199), 7f);
-        Kit.Checkpoint(new Vector3(-3, 24, 194), true);
+        Kit.Checkpoint(new Vector3(-3, 24, 194));
         Kit.Temple(new Vector3(4, 24, 201), 1.4f);
         Kit.Flyer(new Vector3(-3, 27, 201), "sprite");
         Kit.Fruit(new Vector3(-4, 25, 202));
 
-        int required = Kit.FruitCount - 2;   // Level 4: sve voće osim dva
-        Kit.Grapple(new Vector3(0, 29f, 211), required);
-        Kit.Grapple(new Vector3(0, 29.5f, 217), required);
+        // S11 – PTIČJA STAZA: dugi široki most nad kojim kruže ptice, a s neba pada izmet
+        Kit.Bridge(new Vector3(0, 24, 206), 42f, 7f);
+        var drop = Kit.Group("BirdDropZone", new Vector3(0, 24, 227));
+        var dz = drop.gameObject.AddComponent<BirdDropZone>();
+        dz.size = new Vector3(6.4f, 0, 40f);
+        dz.groundY = 24f;
+        Kit.Fruit(new Vector3(-2, 25, 212));
+        Kit.Fruit(new Vector3(2, 25, 220));
+        Kit.Fruit(new Vector3(-2, 25, 229));
+        Kit.Fruit(new Vector3(2, 25, 238));
+        Kit.Slime(new Vector3(0, 24, 233), 2f, "SlimeBlue");
+        for (int i = 0; i < 4; i++)
+        {
+            Kit.MarbleColumn(new Vector3(-4.2f, 24, 210 + i * 10), 4f);
+            Kit.MarbleColumn(new Vector3(4.2f, 24, 210 + i * 10), 4f);
+        }
 
-        // arena – mramorni otok sa zlatnim stupovima
-        Vector3 arena = new Vector3(0, 24, 235);
+        // S12 – otok nakon ptičje staze
+        Kit.FloatIsland(new Vector3(0, 24, 256), 7f);
+        Kit.Checkpoint(new Vector3(-3, 24, 251));
+        Kit.Windmill(new Vector3(-4, 24, 259));
+        Kit.Slime(new Vector3(2, 24, 257), 3f, "SlimeBlue", 1f, true, true);
+        Kit.Spitter(new Vector3(4, 24, 260), "cloud");
+        Kit.Fruit(new Vector3(3, 25, 252));
+        Kit.Fruit(new Vector3(-2, 25, 261));
+
+        // S13 – baloni i jezik preko velike praznine, put se penje
+        Kit.Balloon(new Vector3(0, 24, 267), new Vector3(5, 0, 0), 4.5f, 0f, "Balloon2");
+        Kit.Balloon(new Vector3(3, 25.5f, 274), new Vector3(0, 3, 0), 4f, 0.5f, "Balloon1");
+        Kit.Grapple(new Vector3(0, 32f, 282));
+        Kit.Grapple(new Vector3(-3, 33f, 290));
+        Kit.Flyer(new Vector3(2, 29, 286), "sprite");
+        Kit.Fruit(new Vector3(0, 27, 267));
+        Kit.Fruit(new Vector3(3, 30.5f, 274));
+        Kit.Fruit(new Vector3(-1.5f, 32, 286));
+
+        // S14 – otok s vrtuljkom i njihalima
+        Kit.FloatIsland(new Vector3(-3, 28, 302), 8f);
+        Kit.Checkpoint(new Vector3(-6, 28, 296));
+        Kit.SpinnerBar(new Vector3(-3, 28, 300.5f), 8f, 90f);
+        Kit.Pendulum(new Vector3(-3, 28, 307.5f), 5f, 60f, 2.2f, 0.3f, "Marble");
+        Kit.Slime(new Vector3(0, 28, 299), 3f, "SlimeBlue");
+        Kit.Spitter(new Vector3(-8, 28, 304), "cloud");
+        Kit.Fruit(new Vector3(-8, 29, 299));
+        Kit.Fruit(new Vector3(2, 29, 305));
+        Kit.Fruit(new Vector3(-3, 29, 309));
+
+        // S15 – stepenice od oblaka koje se ruše, prema gore
+        Kit.FallingPlat(new Vector3(-3, 29, 314.5f), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(0, 30, 319), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(3, 31, 323.5f), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.FallingPlat(new Vector3(0, 32, 328), new Vector3(2.6f, 0.8f, 2.6f), "Cloud", "Cloud");
+        Kit.Fruit(new Vector3(0, 31.5f, 319));
+        Kit.Fruit(new Vector3(0, 33.5f, 328));
+
+        // S16 – ispred bossa
+        Kit.FloatIsland(new Vector3(0, 32, 340), 7f);
+        Kit.Checkpoint(new Vector3(-3, 32, 335), true);
+        Kit.Temple(new Vector3(4, 32, 342), 1.4f);
+        Kit.Flyer(new Vector3(-3, 35, 342), "sprite");
+        Kit.Fruit(new Vector3(-4, 33, 343));
+
+        int required = Mathf.RoundToInt(Kit.FruitCount * 0.85f);   // Level 4: 85 % voća
+        Kit.Grapple(new Vector3(0, 37f, 352), required);
+        Kit.Grapple(new Vector3(0, 37.5f, 358), required);
+
+        // arena – mramorni otok s plavim stupovima
+        Vector3 arena = new Vector3(0, 32, 376);
         Kit.FloatIsland(arena, 16f);
         Kit.Checkpoint(arena + new Vector3(-3, 0, -13));
         for (int i = 0; i < 8; i++)
@@ -1019,7 +1114,8 @@ public static class RibblinLevelBuilder
     static void BuildMenu()
     {
         var scene = Kit.NewScene(new Theme { id = "Menu" });
-        Kit.WaterPlane(-0.3f);
+        Kit.WaterPlane(-0.45f, "Water", true);
+        Kit.ShoreFoamRound(Vector3.zero, 11f, -0.1f, 9);
         Kit.RoundGround(new Vector3(0, 0.3f, 0), 11f, 3f, "Sand", "SandDark");
         Kit.RoundGround(new Vector3(0, 0.6f, 0), 8f, 0.4f, "Top", "Top");
         Kit.Palm(new Vector3(-4, 0.6f, 3), 1);
