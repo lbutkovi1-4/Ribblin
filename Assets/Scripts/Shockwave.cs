@@ -12,7 +12,9 @@ public class Shockwave : MonoBehaviour
     bool hit;
     const int Segments = 56;
 
-    public static void Spawn(Vector3 pos, float speed, float maxRadius)
+    public string mat = "Shock";
+
+    public static void Spawn(Vector3 pos, float speed, float maxRadius, string mat = "Shock", float width = 0.55f)
     {
         var go = new GameObject("Shockwave");
         go.transform.position = pos;
@@ -20,15 +22,19 @@ public class Shockwave : MonoBehaviour
         s.speed = speed;
         s.maxRadius = maxRadius;
         s.groundY = pos.y;
+        s.mat = mat;
+        s.width = width;
     }
+
+    float width = 0.55f;
 
     void Start()
     {
         lr = gameObject.AddComponent<LineRenderer>();
         lr.loop = true;
         lr.positionCount = Segments;
-        lr.startWidth = lr.endWidth = 0.55f;
-        lr.material = Fx.Mat("Shock");
+        lr.startWidth = lr.endWidth = width;
+        lr.material = Fx.Mat(mat);
         lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
     }
 
